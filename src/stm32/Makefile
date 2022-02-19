@@ -62,15 +62,24 @@ src-$(CONFIG_SERIAL) += $(serial-src-y) generic/serial_irq.c
 src-$(CONFIG_CANSERIAL) += stm32/can.c ../lib/fast-hash/fasthash.c
 src-$(CONFIG_CANSERIAL) += generic/canbus.c
 src-$(CONFIG_HAVE_GPIO_HARD_PWM) += stm32/hard_pwm.c
+src-$(CONFIG_BLDC):= $(filter-out stepper.c, $(src-y)) #exclude original stepper.c from current build
+src-$(CONFIG_BLDC) += stm32/bldc_stepper.c #and add BLDC version
 
 dirs-$(CONFIG_CANSERIAL) += lib/fast-hash
 
 # Binary output file rules
 target-y += $(OUT)klipper.bin
 
+# Build the additional hex output file
+target-y += $(OUT)klipper.elf.hex
+
 $(OUT)klipper.bin: $(OUT)klipper.elf
 	@echo "  Creating hex file $@"
 	$(Q)$(OBJCOPY) -O binary $< $@
+	
+$(OUT)klipper.elf.hex: $(OUT)klipper.elf
+	@echo "  Creating hex file $@"
+	$(Q)$(OBJCOPY) -j .text -j .data -O ihex $< $@	
 
 # Flash rules
 lib/hidflash/hid-flash:
@@ -84,3 +93,9 @@ flash: $(OUT)klipper.bin lib/hidflash/hid-flash
 serialflash: $(OUT)klipper.bin
 	@echo "  Flashing $< to $(FLASH_DEVICE) via stm32flash"
 	$(Q)stm32flash -w $< -v -g 0 $(FLASH_DEVICE)
+	
+stlinkflash: $(OUT)klipper.bin
+	@echo "  Flashing $< to $(FLASH_DEVICE) via st link"
+	$(Q)st-flash --connect-under-reset write $< $(CONFIG_FLASH_START)	
+	
+

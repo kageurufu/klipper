@@ -6,12 +6,12 @@
 // BLDC mod by arsi@arsi.sk
 // code based on 
 // http://www.berryjam.eu/2015/04/driving-bldc-gimbals-at-super-slow-speeds-with-arduino/
-// Arduino UNO Pins
-//     Arduino - Port - Klipper
-//     D9 - PB1 - 9  >> D3 - PD3 - 27   Defaul port PB1 cannot be used because the timer used for PWM is used by Klipper 
-//     D5 - PD5 - 29
-//     D6 - PD6 - 30
-// EN  D8 - PB0 - 8
+// Nucleo 32F401 PINS
+//     Nucleo - Port - Klipper
+//     D3 - PB3 - 19   Defaul port PB1 cannot be used because the timer used for PWM is used by Klipper 
+//     D5 - PB4 - 20
+//     D6 - PB10 - 26
+// EN  D8 - PA9 - 9
 
 #include "autoconf.h" // CONFIG_*
 #include "basecmd.h" // oid_alloc
@@ -22,32 +22,29 @@
 #include "sched.h" // struct timer
 #include "stepper.h" // stepper_event
 #include "trsync.h"
-#include "avr/gpio.h" // trsync_add_signal
+#include "stm32/gpio.h" // trsync_add_signal
+#include "board/misc.h" // output
 
 #if CONFIG_INLINE_STEPPER_HACK && CONFIG_HAVE_STEPPER_BOTH_EDGE
-#define HAVE_SINGLE_SCHEDULE 1
-#define HAVE_EDGE_OPTIMIZATION 1
-#define HAVE_AVR_OPTIMIZATION 0
-DECL_CONSTANT("STEPPER_BOTH_EDGE", 1);
+ #define HAVE_SINGLE_SCHEDULE 1
+ #define HAVE_EDGE_OPTIMIZATION 1
+ #define HAVE_AVR_OPTIMIZATION 0
+ DECL_CONSTANT("STEPPER_BOTH_EDGE", 1);
 #elif CONFIG_INLINE_STEPPER_HACK && CONFIG_MACH_AVR
-#define HAVE_SINGLE_SCHEDULE 1
-#define HAVE_EDGE_OPTIMIZATION 0
-#define HAVE_AVR_OPTIMIZATION 1
+ #define HAVE_SINGLE_SCHEDULE 1
+ #define HAVE_EDGE_OPTIMIZATION 0
+ #define HAVE_AVR_OPTIMIZATION 1
 #else
-#define HAVE_SINGLE_SCHEDULE 0
-#define HAVE_EDGE_OPTIMIZATION 0
-#define HAVE_AVR_OPTIMIZATION 0
+ #define HAVE_SINGLE_SCHEDULE 0
+ #define HAVE_EDGE_OPTIMIZATION 0
+ #define HAVE_AVR_OPTIMIZATION 0
 #endif
 
-struct gpio_pwm pinU;
-struct gpio_pwm pinV;
-struct gpio_pwm pinW;
+ 
 
-void bldc_init(void) {
-    pinU = gpio_pwm_setup(27, 0, 0);
-    pinV = gpio_pwm_setup(29, 0, 0);
-    pinW = gpio_pwm_setup(30, 0, 0);
-}
+#define PWM_VALUE  84000000 / (CONFIG_SimpleFOC_FREQ*1000)
+
+
 
 struct stepper_move {
     struct move_node node;
@@ -57,9 +54,7 @@ struct stepper_move {
     uint8_t flags;
 };
 
-enum {
-    MF_DIR = 1 << 0
-};
+enum { MF_DIR=1<<0 };
 
 struct stepper {
     struct timer time;
@@ -74,15 +69,24 @@ struct stepper {
     // gcc (pre v6) does better optimization when uint8_t are bitfields
     uint8_t flags : 8;
     uint8_t dir;
+    struct gpio_pwm pinU;
+    struct gpio_pwm pinV;
+    struct gpio_pwm pinW;
+    signed int currentStepA;
+    signed int currentStepB;
+    signed int currentStepC;
+    signed int increment;
+    int power_full;
+    int power_holding;
 };
 
-enum {
-    POSITION_BIAS = 0x40000000
-};
+signed int sineArraySize;
+
+enum { POSITION_BIAS=0x40000000 };
 
 enum {
-    SF_LAST_DIR = 1 << 0, SF_NEXT_DIR = 1 << 1, SF_INVERT_STEP = 1 << 2, SF_NEED_RESET = 1 << 3,
-    SF_SINGLE_SCHED = 1 << 4, SF_HAVE_ADD = 1 << 5
+    SF_LAST_DIR=1<<0, SF_NEXT_DIR=1<<1, SF_INVERT_STEP=1<<2, SF_NEED_RESET=1<<3,
+    SF_SINGLE_SCHED=1<<4, SF_HAVE_ADD=1<<5
 };
 
 
@@ -91,17 +95,37 @@ const int pwmSin[] = {128, 132, 136, 140, 143, 147, 151, 155, 159, 162, 166, 170
 // 5° electrical table, 72 elements
 //const int pwmSin[] = {128, 147, 166, 185, 203, 221, 238, 243, 248, 251, 253, 255, 255, 255, 253, 251, 248, 243, 238, 243, 248, 251, 253, 255, 255, 255, 253, 251, 248, 243, 238, 221, 203, 185, 166, 147, 128, 109, 90, 71, 53, 35, 18, 13, 8, 5, 3, 1, 1, 1, 3, 5, 8, 13, 18, 13, 8, 5, 3, 1, 1, 1, 3, 5, 8, 13, 18, 35, 53, 71, 90, 109};
 
-signed int currentStepA;
-signed int currentStepB;
-signed int currentStepC;
 
-signed int sineArraySize;
-signed int increment = 0;
+void bldc_init(struct stepper *s,uint32_t pin) {
+    s->increment = 0;
+    if (pin == CONFIG_BLDC_PWM0A) {
+        s->pinU = gpio_pwm_setup(19, CONFIG_BLDC_PWM0A, 0);
+        s->pinV = gpio_pwm_setup(20, CONFIG_BLDC_PWM0B, 0);
+        s->pinW = gpio_pwm_setup(26, CONFIG_BLDC_PWM0C, 0);
+        s->power_full = (float) (CONFIG_BLDC_POWER0 * 2.55);
+        s->power_holding = (float) (CONFIG_BLDC_POWER0_HOLDING * 2.55);
+    } else if (pin == CONFIG_BLDC_PWM1A) {
+        s->pinU = gpio_pwm_setup(19, CONFIG_BLDC_PWM1A, 0);
+        s->pinV = gpio_pwm_setup(20, CONFIG_BLDC_PWM1B, 0);
+        s->pinW = gpio_pwm_setup(26, CONFIG_BLDC_PWM1C, 0);
+        s->power_full = (float) (CONFIG_BLDC_POWER1 * 2.55);
+        s->power_holding = (float) (CONFIG_BLDC_POWER1_HOLDING * 2.55);
+    } else if (pin == CONFIG_BLDC_PWM2A) {
+        s->pinU = gpio_pwm_setup(19, CONFIG_BLDC_PWM2A, 0);
+        s->pinV = gpio_pwm_setup(20, CONFIG_BLDC_PWM2B, 0);
+        s->pinW = gpio_pwm_setup(26, CONFIG_BLDC_PWM2C, 0);
+        s->power_full = (float) (CONFIG_BLDC_POWER1 * 2.55);
+        s->power_holding = (float) (CONFIG_BLDC_POWER1_HOLDING * 2.55);
+    } else {
+        shutdown("BLDC stepper pin not found in PWM A pins");
+    }
+     
+}
 
 // Setup a stepper for the next move in its queue
-
 static uint_fast8_t
-stepper_load_next(struct stepper *s) {
+stepper_load_next(struct stepper *s)
+{
     if (move_queue_empty(&s->mq)) {
         // There is no next move - the queue is empty
         s->count = 0;
@@ -116,20 +140,20 @@ stepper_load_next(struct stepper *s) {
     if (HAVE_SINGLE_SCHEDULE && s->flags & SF_SINGLE_SCHED) {
         s->time.waketime += m->interval;
         if (HAVE_AVR_OPTIMIZATION)
-            s->flags = m->add ? s->flags | SF_HAVE_ADD : s->flags & ~SF_HAVE_ADD;
+            s->flags = m->add ? s->flags|SF_HAVE_ADD : s->flags & ~SF_HAVE_ADD;
         s->count = m->count;
     } else {
         // It is necessary to schedule unstep events and so there are
         // twice as many events.
         s->next_step_time += m->interval;
         s->time.waketime = s->next_step_time;
-        s->count = (uint32_t) m->count * 2;
+        s->count = (uint32_t)m->count * 2;
     }
     // Add all steps to s->position (stepper_get_position() can calc mid-move)
     if (m->flags & MF_DIR) {
         s->position = -s->position + m->count;
-        // gpio_out_toggle_noirq(s->dir_pin);
-        s->dir = !s->dir;
+       // gpio_out_toggle_noirq(s->dir_pin);
+        s->dir=!s->dir;
     } else {
         s->position += m->count;
     }
@@ -141,93 +165,96 @@ stepper_load_next(struct stepper *s) {
 
 #define AVR_STEP_INSNS 40 // minimum instructions between step gpio pulses
 
-// AVR optimized step function
+void setMotorPosition(struct stepper *s,float power){
+    gpio_pwm_write(s->pinU,(float) (pwmSin[s->currentStepA]* (power / 255.0)));
+    gpio_pwm_write(s->pinV, (float) (pwmSin[s->currentStepB]* (power / 255.0)));
+    gpio_pwm_write(s->pinW, (float) (pwmSin[s->currentStepC]* (power / 255.0)));
+}
 
+
+// AVR optimized step function
 inline static uint_fast8_t
 stepper_event_avr(struct timer *t) {
     struct stepper *s = container_of(t, struct stepper, time);
+    if (likely(s->dir == 1)) s->increment = 1;
+    else s->increment = -1;
 
-
-    if (likely(s->dir == 1)) increment = 1;
-    else increment = -1;
-
-    currentStepA = currentStepA + increment;
-    currentStepB = currentStepB + increment;
-    currentStepC = currentStepC + increment;
+    s->currentStepA = s->currentStepA + s->increment;
+    s->currentStepB = s->currentStepB + s->increment;
+    s->currentStepC = s->currentStepC + s->increment;
 
     //Check for lookup table overflow and return to opposite end if necessary
-    if (likely(currentStepA > sineArraySize)) currentStepA = 0;
-    if (likely(currentStepA < 0)) currentStepA = sineArraySize;
+    if (likely(s->currentStepA > sineArraySize)) s->currentStepA = 0;
+    if (likely(s->currentStepA < 0)) s->currentStepA = sineArraySize;
 
-    if (likely(currentStepB > sineArraySize)) currentStepB = 0;
-    if (likely(currentStepB < 0)) currentStepB = sineArraySize;
+    if (likely(s->currentStepB > sineArraySize)) s->currentStepB = 0;
+    if (likely(s->currentStepB < 0)) s->currentStepB = sineArraySize;
 
-    if (likely(currentStepC > sineArraySize)) currentStepC = 0;
-    if (likely(currentStepC < 0)) currentStepC = sineArraySize;
-    gpio_pwm_write(pinU, pwmSin[currentStepA]);
-    gpio_pwm_write(pinV, pwmSin[currentStepB]);
-    gpio_pwm_write(pinW, pwmSin[currentStepC]);
-    //    gpio_out_toggle_noirq(s->step_pin);
-    uint16_t *pcount = (void*) &s->count, count = *pcount - 1;
-    if (likely(count)) {
-        *pcount = count;
-        s->time.waketime += s->interval;
-        //  gpio_out_toggle_noirq(s->step_pin);
-        if (s->flags & SF_HAVE_ADD)
-            s->interval += s->add;
-        return SF_RESCHEDULE;
-    }
+    if (likely(s->currentStepC > sineArraySize)) s->currentStepC = 0;
+    if (likely(s->currentStepC < 0)) s->currentStepC = sineArraySize;
+    setMotorPosition(s,s->power_full);
+        uint16_t *pcount = (void*)&s->count, count = *pcount - 1;
+        if (likely(count)) {
+            *pcount = count;
+            s->time.waketime += s->interval;
+          //  gpio_out_toggle_noirq(s->step_pin);
+            if (s->flags & SF_HAVE_ADD)
+                s->interval += s->add;
+            return SF_RESCHEDULE;
+        }
     uint_fast8_t ret = stepper_load_next(s);
-    // gpio_out_toggle_noirq(s->step_pin);
+    if(ret==SF_DONE){
+        setMotorPosition(s,s->power_holding);
+    }
     return ret;
 }
 
 
 
 // Optimized entry point for step function (may be inlined into sched.c code)
-
 inline uint_fast8_t
-stepper_event(struct timer *t) {
-    return stepper_event_avr(t);
+stepper_event(struct timer *t)
+{
+        return stepper_event_avr(t);
 }
 
+
+
 void
-command_config_stepper(uint32_t *args) {
-    struct stepper *s = oid_alloc(args[0], command_config_stepper, sizeof (*s));
+command_config_stepper(uint32_t *args)
+{
+    struct stepper *s = oid_alloc(args[0], command_config_stepper, sizeof(*s));
     int_fast8_t invert_step = args[3];
     s->flags = invert_step > 0 ? SF_INVERT_STEP : 0;
-    bldc_init();
-    //    s->step_pin = gpio_out_setup(args[1], s->flags & SF_INVERT_STEP);
-    //   s->dir_pin = gpio_out_setup(args[2], 0);
-    s->dir = 0;
+    bldc_init(s,args[1]);
+//    s->step_pin = gpio_out_setup(args[1], s->flags & SF_INVERT_STEP);
+ //   s->dir_pin = gpio_out_setup(args[2], 0);
+    s->dir=0;
     s->position = -POSITION_BIAS;
     s->step_pulse_ticks = args[4];
-    move_queue_setup(&s->mq, sizeof (struct stepper_move));
-    if (s->step_pulse_ticks <= AVR_STEP_INSNS)
-        s->flags |= SF_SINGLE_SCHED;
-    else
-        s->time.func = stepper_event_full;
+    move_queue_setup(&s->mq, sizeof(struct stepper_move));
+    s->flags |= SF_SINGLE_SCHED;
     sineArraySize = sizeof (pwmSin) / sizeof (int); // Find lookup table size
     int phaseShift = sineArraySize / 3; // Find phase shift and initial A, B C phase values
-    currentStepA = 0;
-    currentStepB = currentStepA + phaseShift;
-    currentStepC = currentStepB + phaseShift;
+    s->currentStepA = 0;
+    s->currentStepB = s->currentStepA + phaseShift;
+    s->currentStepC = s->currentStepB + phaseShift;
     sineArraySize--;
 }
 DECL_COMMAND(command_config_stepper, "config_stepper oid=%c step_pin=%c"
-        " dir_pin=%c invert_step=%c step_pulse_ticks=%u");
+             " dir_pin=%c invert_step=%c step_pulse_ticks=%u");
 
 // Return the 'struct stepper' for a given stepper oid
-
 static struct stepper *
-stepper_oid_lookup(uint8_t oid) {
+stepper_oid_lookup(uint8_t oid)
+{
     return oid_lookup(oid, command_config_stepper);
 }
 
 // Schedule a set of steps with a given timing
-
 void
-command_queue_step(uint32_t *args) {
+command_queue_step(uint32_t *args)
+{
     struct stepper *s = stepper_oid_lookup(args[0]);
     struct stepper_move *m = move_alloc();
     m->interval = args[1];
@@ -257,12 +284,12 @@ command_queue_step(uint32_t *args) {
     irq_enable();
 }
 DECL_COMMAND(command_queue_step,
-        "queue_step oid=%c interval=%u count=%hu add=%hi");
+             "queue_step oid=%c interval=%u count=%hu add=%hi");
 
 // Set the direction of the next queued step
-
 void
-command_set_next_step_dir(uint32_t *args) {
+command_set_next_step_dir(uint32_t *args)
+{
     struct stepper *s = stepper_oid_lookup(args[0]);
     uint8_t nextdir = args[1] ? SF_NEXT_DIR : 0;
     irq_disable();
@@ -272,9 +299,9 @@ command_set_next_step_dir(uint32_t *args) {
 DECL_COMMAND(command_set_next_step_dir, "set_next_step_dir oid=%c dir=%c");
 
 // Set an absolute time that the next step will be relative to
-
 void
-command_reset_step_clock(uint32_t *args) {
+command_reset_step_clock(uint32_t *args)
+{
     struct stepper *s = stepper_oid_lookup(args[0]);
     uint32_t waketime = args[1];
     irq_disable();
@@ -287,9 +314,9 @@ command_reset_step_clock(uint32_t *args) {
 DECL_COMMAND(command_reset_step_clock, "reset_step_clock oid=%c clock=%u");
 
 // Return the current stepper position.  Caller must disable irqs.
-
 static uint32_t
-stepper_get_position(struct stepper *s) {
+stepper_get_position(struct stepper *s)
+{
     uint32_t position = s->position;
     // If stepper is mid-move, subtract out steps not yet taken
     if (HAVE_SINGLE_SCHEDULE && s->flags & SF_SINGLE_SCHED)
@@ -303,9 +330,9 @@ stepper_get_position(struct stepper *s) {
 }
 
 // Report the current position of the stepper
-
 void
-command_stepper_get_position(uint32_t *args) {
+command_stepper_get_position(uint32_t *args)
+{
     uint8_t oid = args[0];
     struct stepper *s = stepper_oid_lookup(oid);
     irq_disable();
@@ -316,22 +343,22 @@ command_stepper_get_position(uint32_t *args) {
 DECL_COMMAND(command_stepper_get_position, "stepper_get_position oid=%c");
 
 // Stop all moves for a given stepper (caller must disable IRQs)
-
 static void
-stepper_stop(struct trsync_signal *tss, uint8_t reason) {
+stepper_stop(struct trsync_signal *tss, uint8_t reason)
+{
     struct stepper *s = container_of(tss, struct stepper, stop_signal);
     sched_del_timer(&s->time);
     s->next_step_time = s->time.waketime = 0;
     s->position = -stepper_get_position(s);
     s->count = 0;
-    s->flags = (s->flags & (SF_INVERT_STEP | SF_SINGLE_SCHED)) | SF_NEED_RESET;
-    //   gpio_out_write(s->dir_pin, 0);
-    gpio_pwm_write(pinU, 0);
-    gpio_pwm_write(pinV, 0);
-    gpio_pwm_write(pinW, 0);
-    s->dir = 0;
-    //    if (!(HAVE_EDGE_OPTIMIZATION && s->flags & SF_SINGLE_SCHED))
-    //        gpio_out_write(s->step_pin, s->flags & SF_INVERT_STEP);
+    s->flags = (s->flags & (SF_INVERT_STEP|SF_SINGLE_SCHED)) | SF_NEED_RESET;
+ //   gpio_out_write(s->dir_pin, 0);
+    gpio_pwm_write(s->pinU,0);
+    gpio_pwm_write(s->pinV,0);
+    gpio_pwm_write(s->pinW,0);
+    s->dir=0;
+//    if (!(HAVE_EDGE_OPTIMIZATION && s->flags & SF_SINGLE_SCHED))
+//        gpio_out_write(s->step_pin, s->flags & SF_INVERT_STEP);
     while (!move_queue_empty(&s->mq)) {
         struct move_node *mn = move_queue_pop(&s->mq);
         struct stepper_move *m = container_of(mn, struct stepper_move, node);
@@ -340,21 +367,21 @@ stepper_stop(struct trsync_signal *tss, uint8_t reason) {
 }
 
 // Set the stepper to stop on a "trigger event" (used in homing)
-
 void
-command_stepper_stop_on_trigger(uint32_t *args) {
+command_stepper_stop_on_trigger(uint32_t *args)
+{
     struct stepper *s = stepper_oid_lookup(args[0]);
     struct trsync *ts = trsync_oid_lookup(args[1]);
     trsync_add_signal(ts, &s->stop_signal, stepper_stop);
 }
 DECL_COMMAND(command_stepper_stop_on_trigger,
-        "stepper_stop_on_trigger oid=%c trsync_oid=%c");
+             "stepper_stop_on_trigger oid=%c trsync_oid=%c");
 
 void
-stepper_shutdown(void) {
+stepper_shutdown(void)
+{
     uint8_t i;
     struct stepper *s;
-
     foreach_oid(i, s, command_config_stepper) {
         move_queue_clear(&s->mq);
         stepper_stop(&s->stop_signal, 0);
