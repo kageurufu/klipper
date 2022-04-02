@@ -99,21 +99,21 @@ const int pwmSin[] = {128, 132, 136, 140, 143, 147, 151, 155, 159, 162, 166, 170
 void bldc_init(struct stepper *s,uint32_t pin) {
     s->increment = 0;
     if (pin == CONFIG_BLDC_PWM0A) {
-        s->pinU = gpio_pwm_setup(19, CONFIG_BLDC_PWM0A, 0);
-        s->pinV = gpio_pwm_setup(20, CONFIG_BLDC_PWM0B, 0);
-        s->pinW = gpio_pwm_setup(26, CONFIG_BLDC_PWM0C, 0);
+        s->pinU = gpio_pwm_setup(CONFIG_BLDC_PWM0A, CONFIG_BLDC_FREQ, 0);
+        s->pinV = gpio_pwm_setup(CONFIG_BLDC_PWM0B, CONFIG_BLDC_FREQ, 0);
+        s->pinW = gpio_pwm_setup(CONFIG_BLDC_PWM0C, CONFIG_BLDC_FREQ, 0);
         s->power_full = (float) (CONFIG_BLDC_POWER0 * 2.55);
         s->power_holding = (float) (CONFIG_BLDC_POWER0_HOLDING * 2.55);
     } else if (pin == CONFIG_BLDC_PWM1A) {
-        s->pinU = gpio_pwm_setup(19, CONFIG_BLDC_PWM1A, 0);
-        s->pinV = gpio_pwm_setup(20, CONFIG_BLDC_PWM1B, 0);
-        s->pinW = gpio_pwm_setup(26, CONFIG_BLDC_PWM1C, 0);
+        s->pinU = gpio_pwm_setup(CONFIG_BLDC_PWM1A, CONFIG_BLDC_FREQ, 0);
+        s->pinV = gpio_pwm_setup(CONFIG_BLDC_PWM1B, CONFIG_BLDC_FREQ, 0);
+        s->pinW = gpio_pwm_setup(CONFIG_BLDC_PWM1C, CONFIG_BLDC_FREQ, 0);
         s->power_full = (float) (CONFIG_BLDC_POWER1 * 2.55);
         s->power_holding = (float) (CONFIG_BLDC_POWER1_HOLDING * 2.55);
     } else if (pin == CONFIG_BLDC_PWM2A) {
-        s->pinU = gpio_pwm_setup(19, CONFIG_BLDC_PWM2A, 0);
-        s->pinV = gpio_pwm_setup(20, CONFIG_BLDC_PWM2B, 0);
-        s->pinW = gpio_pwm_setup(26, CONFIG_BLDC_PWM2C, 0);
+        s->pinU = gpio_pwm_setup(CONFIG_BLDC_PWM2A, CONFIG_BLDC_FREQ, 0);
+        s->pinV = gpio_pwm_setup(CONFIG_BLDC_PWM2B, CONFIG_BLDC_FREQ, 0);
+        s->pinW = gpio_pwm_setup(CONFIG_BLDC_PWM2C, CONFIG_BLDC_FREQ, 0);
         s->power_full = (float) (CONFIG_BLDC_POWER1 * 2.55);
         s->power_holding = (float) (CONFIG_BLDC_POWER1_HOLDING * 2.55);
     } else {
