@@ -11,7 +11,7 @@
 #include "internal.h" // GPIO
 #include "sched.h" // sched_shutdown
 
-#define MAX_PWM 255
+#define MAX_PWM 4095
 DECL_CONSTANT("PWM_MAX", MAX_PWM);
 
 struct gpio_pwm_info {
@@ -46,18 +46,18 @@ static const struct gpio_pwm_info pwm_regs[] = {
     {TIM4, GPIO('B', 8),  3, GPIO_FUNCTION(2)},
     {TIM4, GPIO('B', 9),  4, GPIO_FUNCTION(2)}
 #elif CONFIG_MACH_STM32F4
-  #if CONFIG_MACH_STM32F401
+#if CONFIG_MACH_STM32F401
     {TIM3,  GPIO('A',  6),  1, GPIO_FUNCTION(2)},
     {TIM3,  GPIO('C',  6),  1, GPIO_FUNCTION(3)},
     {TIM3,  GPIO('A',  7),  2, GPIO_FUNCTION(2)},
     {TIM3,  GPIO('C',  7),  2, GPIO_FUNCTION(3)},
     {TIM3,  GPIO('C',  8),  3, GPIO_FUNCTION(3)},
     {TIM3,  GPIO('C',  9),  4, GPIO_FUNCTION(3)},
-  #endif
-  #if CONFIG_MACH_STM32F446
+#endif
+#if CONFIG_MACH_STM32F446
     {TIM2,  GPIO('B',  2),  4, GPIO_FUNCTION(1)},
-  #endif
-  #if CONFIG_MACH_STM32F4x5 || CONFIG_MACH_STM32F446
+#endif
+#if CONFIG_MACH_STM32F4x5 || CONFIG_MACH_STM32F446
     {TIM8,  GPIO('C',  6),  1, GPIO_FUNCTION(3)},
     {TIM8,  GPIO('C',  7),  2, GPIO_FUNCTION(3)},
     {TIM8,  GPIO('C',  8),  3, GPIO_FUNCTION(3)},
@@ -69,7 +69,7 @@ static const struct gpio_pwm_info pwm_regs[] = {
     {TIM13, GPIO('F',  8),  1, GPIO_FUNCTION(9)},
     {TIM14, GPIO('A',  7),  1, GPIO_FUNCTION(9)},
     {TIM14, GPIO('F',  9),  1, GPIO_FUNCTION(9)},
-  #endif
+#endif
     // Pins that map to all klipper defined STM32F4 procs
     {TIM1,  GPIO('A',  8),  1, GPIO_FUNCTION(1)},
     {TIM1,  GPIO('E',  9),  1, GPIO_FUNCTION(1)},
@@ -194,7 +194,7 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
             p->timer->CCER &= ~TIM_CCER_CC1E;
             p->timer->CCMR1 &= ~(TIM_CCMR1_OC1M | TIM_CCMR1_CC1S);
             p->timer->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2 |
-                                TIM_CCMR1_OC1PE | TIM_CCMR1_OC1FE);
+                    TIM_CCMR1_OC1PE | TIM_CCMR1_OC1FE);
             gpio_pwm_write(channel, val);
             p->timer->CCER |= TIM_CCER_CC1E;
             break;
@@ -204,7 +204,7 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
             p->timer->CCER &= ~TIM_CCER_CC2E;
             p->timer->CCMR1 &= ~(TIM_CCMR1_OC2M | TIM_CCMR1_CC2S);
             p->timer->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2 |
-                                TIM_CCMR1_OC2PE | TIM_CCMR1_OC2FE);
+                    TIM_CCMR1_OC2PE | TIM_CCMR1_OC2FE);
             gpio_pwm_write(channel, val);
             p->timer->CCER |= TIM_CCER_CC2E;
             break;
@@ -214,7 +214,7 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
             p->timer->CCER &= ~TIM_CCER_CC3E;
             p->timer->CCMR2 &= ~(TIM_CCMR2_OC3M | TIM_CCMR2_CC3S);
             p->timer->CCMR2 |= (TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2 |
-                                TIM_CCMR2_OC3PE | TIM_CCMR2_OC3FE);
+                    TIM_CCMR2_OC3PE | TIM_CCMR2_OC3FE);
             gpio_pwm_write(channel, val);
             p->timer->CCER |= TIM_CCER_CC3E;
             break;
@@ -224,7 +224,7 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
             p->timer->CCER &= ~TIM_CCER_CC4E;
             p->timer->CCMR2 &= ~(TIM_CCMR2_OC4M | TIM_CCMR2_CC4S);
             p->timer->CCMR2 |= (TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2 |
-                                TIM_CCMR2_OC4PE | TIM_CCMR2_OC4FE);
+                    TIM_CCMR2_OC4PE | TIM_CCMR2_OC4FE);
             gpio_pwm_write(channel, val);
             p->timer->CCER |= TIM_CCER_CC4E;
             break;
@@ -233,13 +233,44 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
             shutdown("Invalid PWM channel");
     }
     // Enable PWM output
-    p->timer->CR1 |= TIM_CR1_CEN;
+#ifndef CONFIG_BLDC
+    // p->timer->CR1 |= TIM_CR1_CEN;
+#endif
 #if CONFIG_MACH_STM32H7
     p->timer->BDTR |= TIM_BDTR_MOE;
 #endif
     return channel;
 }
 
+#ifdef CONFIG_BLDC
+void
+gpio_pwm_start(uint8_t pin1, uint8_t pin2, uint8_t pin3) {
+    const struct gpio_pwm_info* p1 = pwm_regs;
+    const struct gpio_pwm_info* p2 = pwm_regs;
+    const struct gpio_pwm_info* p3 = pwm_regs;
+    for (;; p1++) {
+        if (p1 >= &pwm_regs[ARRAY_SIZE(pwm_regs)])
+            shutdown("Not a valid PWM pin");
+        if (p1->pin == pin1)
+            break;
+    }
+    for (;; p2++) {
+        if (p2 >= &pwm_regs[ARRAY_SIZE(pwm_regs)])
+            shutdown("Not a valid PWM pin");
+        if (p2->pin == pin2)
+            break;
+    }
+    for (;; p3++) {
+        if (p3 >= &pwm_regs[ARRAY_SIZE(pwm_regs)])
+            shutdown("Not a valid PWM pin");
+        if (p3->pin == pin3)
+            break;
+    }
+    p1->timer->CR1 |= TIM_CR1_CEN;
+    p2->timer->CR1 |= TIM_CR1_CEN;
+    p3->timer->CR1 |= TIM_CR1_CEN;
+}
+#endif
 void
 gpio_pwm_write(struct gpio_pwm g, uint32_t val) {
     *(volatile uint32_t*) g.reg = val;

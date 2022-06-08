@@ -26,21 +26,21 @@
 #include "board/misc.h" // output
 
 #if CONFIG_INLINE_STEPPER_HACK && CONFIG_HAVE_STEPPER_BOTH_EDGE
- #define HAVE_SINGLE_SCHEDULE 1
- #define HAVE_EDGE_OPTIMIZATION 1
- #define HAVE_AVR_OPTIMIZATION 0
- DECL_CONSTANT("STEPPER_BOTH_EDGE", 1);
+#define HAVE_SINGLE_SCHEDULE 1
+#define HAVE_EDGE_OPTIMIZATION 1
+#define HAVE_AVR_OPTIMIZATION 0
+DECL_CONSTANT("STEPPER_BOTH_EDGE", 1);
 #elif CONFIG_INLINE_STEPPER_HACK && CONFIG_MACH_AVR
- #define HAVE_SINGLE_SCHEDULE 1
- #define HAVE_EDGE_OPTIMIZATION 0
- #define HAVE_AVR_OPTIMIZATION 1
+#define HAVE_SINGLE_SCHEDULE 1
+#define HAVE_EDGE_OPTIMIZATION 0
+#define HAVE_AVR_OPTIMIZATION 1
 #else
- #define HAVE_SINGLE_SCHEDULE 0
- #define HAVE_EDGE_OPTIMIZATION 0
- #define HAVE_AVR_OPTIMIZATION 0
+#define HAVE_SINGLE_SCHEDULE 0
+#define HAVE_EDGE_OPTIMIZATION 0
+#define HAVE_AVR_OPTIMIZATION 0
 #endif
 
- 
+
 
 #define PWM_VALUE  84000000 / (CONFIG_BLDC_FREQ*1000)
 
@@ -91,12 +91,14 @@ enum {
 
 
 // 1° electrical table, 360 elements
-const int pwmSin[] = {128, 132, 136, 140, 143, 147, 151, 155, 159, 162, 166, 170, 174, 178, 181, 185, 189, 192, 196, 200, 203, 207, 211, 214, 218, 221, 225, 228, 232, 235, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 248, 249, 250, 250, 251, 252, 252, 253, 253, 253, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 254, 254, 254, 253, 253, 253, 252, 252, 251, 250, 250, 249, 248, 248, 247, 246, 245, 244, 243, 242, 241, 240, 239, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 248, 249, 250, 250, 251, 252, 252, 253, 253, 253, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 254, 254, 254, 253, 253, 253, 252, 252, 251, 250, 250, 249, 248, 248, 247, 246, 245, 244, 243, 242, 241, 240, 239, 238, 235, 232, 228, 225, 221, 218, 214, 211, 207, 203, 200, 196, 192, 189, 185, 181, 178, 174, 170, 166, 162, 159, 155, 151, 147, 143, 140, 136, 132, 128, 124, 120, 116, 113, 109, 105, 101, 97, 94, 90, 86, 82, 78, 75, 71, 67, 64, 60, 56, 53, 49, 45, 42, 38, 35, 31, 28, 24, 21, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 8, 7, 6, 6, 5, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 8, 7, 6, 6, 5, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 24, 28, 31, 35, 38, 42, 45, 49, 53, 56, 60, 64, 67, 71, 75, 78, 82, 86, 90, 94, 97, 101, 105, 109, 113, 116, 120, 124};
+const int pwmSin[] = {2048, 2102, 2155, 2209, 2262, 2316, 2369, 2422, 2475, 2528, 2581, 2634, 2687, 2739, 2791, 2843, 2895, 2946, 2997, 3048, 3098, 3149, 3199, 3248, 3297, 3346, 3394, 3442, 3490, 3537, 3584, 3599, 3614, 3628, 3642, 3655, 3668, 3680, 3692, 3703, 3714, 3725, 3734, 3744, 3752, 3761, 3769, 3776, 3782, 3789, 3794, 3799, 3804, 3808, 3811, 3814, 3817, 3819, 3820, 3821, 3821, 3821, 3820, 3819, 3817, 3814, 3811, 3808, 3804, 3799, 3794, 3789, 3782, 3776, 3769, 3761, 3752, 3744, 3734, 3725, 3714, 3703, 3692, 3680, 3668, 3655, 3642, 3628, 3614, 3599, 3584, 3599, 3614, 3628, 3642, 3655, 3668, 3680, 3692, 3703, 3714, 3725, 3734, 3744, 3752, 3761, 3769, 3776, 3782, 3789, 3794, 3799, 3804, 3808, 3811, 3814, 3817, 3819, 3820, 3821, 3821, 3821, 3820, 3819, 3817, 3814, 3811, 3808, 3804, 3799, 3794, 3789, 3782, 3776, 3769, 3761, 3752, 3744, 3734, 3725, 3714, 3703, 3692, 3680, 3668, 3655, 3642, 3628, 3614, 3599, 3584, 3537, 3490, 3442, 3394, 3346, 3297, 3248, 3199, 3149, 3098, 3048, 2997, 2946, 2895, 2843, 2791, 2739, 2687, 2634, 2581, 2528, 2475, 2422, 2369, 2316, 2262, 2209, 2155, 2102, 2048, 1994, 1941, 1887, 1834, 1780, 1727, 1674, 1621, 1568, 1515, 1462, 1409, 1357, 1305, 1253, 1201, 1150, 1099, 1048, 998, 947, 897, 848, 799, 750, 702, 654, 606, 559, 512, 497, 482, 468, 454, 441, 428, 416, 404, 393, 382, 371, 362, 352, 344, 335, 327, 320, 314, 307, 302, 297, 292, 288, 285, 282, 279, 277, 276, 275, 275, 275, 276, 277, 279, 282, 285, 288, 292, 297, 302, 307, 314, 320, 327, 335, 344, 352, 362, 371, 382, 393, 404, 416, 428, 441, 454, 468, 482, 497, 512, 497, 482, 468, 454, 441, 428, 416, 404, 393, 382, 371, 362, 352, 344, 335, 327, 320, 314, 307, 302, 297, 292, 288, 285, 282, 279, 277, 276, 275, 275, 275, 276, 277, 279, 282, 285, 288, 292, 297, 302, 307, 314, 320, 327, 335, 344, 352, 362, 371, 382, 393, 404, 416, 428, 441, 454, 468, 482, 497, 512, 559, 606, 654, 702, 750, 799, 848, 897, 947, 998, 1048, 1099, 1150, 1201, 1253, 1305, 1357, 1409, 1462, 1515, 1568, 1621, 1674, 1727, 1780, 1834, 1887, 1941, 1994, 2048};
+//const int pwmSin[] = {128, 132, 136, 140, 143, 147, 151, 155, 159, 162, 166, 170, 174, 178, 181, 185, 189, 192, 196, 200, 203, 207, 211, 214, 218, 221, 225, 228, 232, 235, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 248, 249, 250, 250, 251, 252, 252, 253, 253, 253, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 254, 254, 254, 253, 253, 253, 252, 252, 251, 250, 250, 249, 248, 248, 247, 246, 245, 244, 243, 242, 241, 240, 239, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 248, 249, 250, 250, 251, 252, 252, 253, 253, 253, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 254, 254, 254, 253, 253, 253, 252, 252, 251, 250, 250, 249, 248, 248, 247, 246, 245, 244, 243, 242, 241, 240, 239, 238, 235, 232, 228, 225, 221, 218, 214, 211, 207, 203, 200, 196, 192, 189, 185, 181, 178, 174, 170, 166, 162, 159, 155, 151, 147, 143, 140, 136, 132, 128, 124, 120, 116, 113, 109, 105, 101, 97, 94, 90, 86, 82, 78, 75, 71, 67, 64, 60, 56, 53, 49, 45, 42, 38, 35, 31, 28, 24, 21, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 8, 7, 6, 6, 5, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 8, 7, 6, 6, 5, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 24, 28, 31, 35, 38, 42, 45, 49, 53, 56, 60, 64, 67, 71, 75, 78, 82, 86, 90, 94, 97, 101, 105, 109, 113, 116, 120, 124};
 // 5° electrical table, 72 elements
 //const int pwmSin[] = {128, 147, 166, 185, 203, 221, 238, 243, 248, 251, 253, 255, 255, 255, 253, 251, 248, 243, 238, 243, 248, 251, 253, 255, 255, 255, 253, 251, 248, 243, 238, 221, 203, 185, 166, 147, 128, 109, 90, 71, 53, 35, 18, 13, 8, 5, 3, 1, 1, 1, 3, 5, 8, 13, 18, 13, 8, 5, 3, 1, 1, 1, 3, 5, 8, 13, 18, 35, 53, 71, 90, 109};
 
+extern void gpio_pwm_start(uint8_t pin1, uint8_t pin2, uint8_t pin3);
 
-void bldc_init(struct stepper *s,uint32_t pin) {
+void bldc_init(struct stepper *s, uint32_t pin) {
     s->increment = 0;
     if (pin == CONFIG_BLDC_PWM0A) {
         s->pinU = gpio_pwm_setup(CONFIG_BLDC_PWM0A, PWM_VALUE, 0);
@@ -104,22 +106,25 @@ void bldc_init(struct stepper *s,uint32_t pin) {
         s->pinW = gpio_pwm_setup(CONFIG_BLDC_PWM0C, PWM_VALUE, 0);
         s->power_full = (float) (CONFIG_BLDC_POWER0 * 2.55);
         s->power_holding = (float) (CONFIG_BLDC_POWER0_HOLDING * 2.55);
+        gpio_pwm_start(CONFIG_BLDC_PWM0A, CONFIG_BLDC_PWM0B, CONFIG_BLDC_PWM0C);
     } else if (pin == CONFIG_BLDC_PWM1A) {
         s->pinU = gpio_pwm_setup(CONFIG_BLDC_PWM1A, PWM_VALUE, 0);
         s->pinV = gpio_pwm_setup(CONFIG_BLDC_PWM1B, PWM_VALUE, 0);
         s->pinW = gpio_pwm_setup(CONFIG_BLDC_PWM1C, PWM_VALUE, 0);
         s->power_full = (float) (CONFIG_BLDC_POWER1 * 2.55);
         s->power_holding = (float) (CONFIG_BLDC_POWER1_HOLDING * 2.55);
+        gpio_pwm_start(CONFIG_BLDC_PWM1A, CONFIG_BLDC_PWM1B, CONFIG_BLDC_PWM1C);
     } else if (pin == CONFIG_BLDC_PWM2A) {
         s->pinU = gpio_pwm_setup(CONFIG_BLDC_PWM2A, PWM_VALUE, 0);
         s->pinV = gpio_pwm_setup(CONFIG_BLDC_PWM2B, PWM_VALUE, 0);
         s->pinW = gpio_pwm_setup(CONFIG_BLDC_PWM2C, PWM_VALUE, 0);
         s->power_full = (float) (CONFIG_BLDC_POWER1 * 2.55);
         s->power_holding = (float) (CONFIG_BLDC_POWER1_HOLDING * 2.55);
+        gpio_pwm_start(CONFIG_BLDC_PWM2A, CONFIG_BLDC_PWM2B, CONFIG_BLDC_PWM2C);
     } else {
         shutdown("BLDC stepper pin not found in PWM A pins");
     }
-     
+
 }
 
 // Setup a stepper for the next move in its queue
@@ -152,7 +157,7 @@ stepper_load_next(struct stepper *s)
     // Add all steps to s->position (stepper_get_position() can calc mid-move)
     if (m->flags & MF_DIR) {
         s->position = -s->position + m->count;
-       // gpio_out_toggle_noirq(s->dir_pin);
+        // gpio_out_toggle_noirq(s->dir_pin);
         s->dir=!s->dir;
     } else {
         s->position += m->count;
@@ -194,14 +199,14 @@ stepper_event_avr(struct timer *t) {
     if (likely(s->currentStepC < 0)) s->currentStepC = sineArraySize;
     setMotorPosition(s,s->power_full);
         uint16_t *pcount = (void*)&s->count, count = *pcount - 1;
-        if (likely(count)) {
-            *pcount = count;
-            s->time.waketime += s->interval;
-          //  gpio_out_toggle_noirq(s->step_pin);
-            if (s->flags & SF_HAVE_ADD)
-                s->interval += s->add;
-            return SF_RESCHEDULE;
-        }
+    if (likely(count)) {
+        *pcount = count;
+        s->time.waketime += s->interval;
+        //  gpio_out_toggle_noirq(s->step_pin);
+        if (s->flags & SF_HAVE_ADD)
+            s->interval += s->add;
+        return SF_RESCHEDULE;
+    }
     uint_fast8_t ret = stepper_load_next(s);
     if(ret==SF_DONE){
         setMotorPosition(s,s->power_holding);
@@ -215,7 +220,7 @@ stepper_event_avr(struct timer *t) {
 inline uint_fast8_t
 stepper_event(struct timer *t)
 {
-        return stepper_event_avr(t);
+    return stepper_event_avr(t);
 }
 
 
@@ -227,8 +232,8 @@ command_config_stepper(uint32_t *args)
     int_fast8_t invert_step = args[3];
     s->flags = invert_step > 0 ? SF_INVERT_STEP : 0;
     bldc_init(s,args[1]);
-//    s->step_pin = gpio_out_setup(args[1], s->flags & SF_INVERT_STEP);
- //   s->dir_pin = gpio_out_setup(args[2], 0);
+    //    s->step_pin = gpio_out_setup(args[1], s->flags & SF_INVERT_STEP);
+    //   s->dir_pin = gpio_out_setup(args[2], 0);
     s->dir=0;
     s->position = -POSITION_BIAS;
     s->step_pulse_ticks = args[4];
@@ -242,7 +247,7 @@ command_config_stepper(uint32_t *args)
     sineArraySize--;
 }
 DECL_COMMAND(command_config_stepper, "config_stepper oid=%c step_pin=%c"
-             " dir_pin=%c invert_step=%c step_pulse_ticks=%u");
+        " dir_pin=%c invert_step=%c step_pulse_ticks=%u");
 
 // Return the 'struct stepper' for a given stepper oid
 static struct stepper *
@@ -284,7 +289,7 @@ command_queue_step(uint32_t *args)
     irq_enable();
 }
 DECL_COMMAND(command_queue_step,
-             "queue_step oid=%c interval=%u count=%hu add=%hi");
+        "queue_step oid=%c interval=%u count=%hu add=%hi");
 
 // Set the direction of the next queued step
 void
@@ -352,13 +357,13 @@ stepper_stop(struct trsync_signal *tss, uint8_t reason)
     s->position = -stepper_get_position(s);
     s->count = 0;
     s->flags = (s->flags & (SF_INVERT_STEP|SF_SINGLE_SCHED)) | SF_NEED_RESET;
- //   gpio_out_write(s->dir_pin, 0);
+    //   gpio_out_write(s->dir_pin, 0);
     gpio_pwm_write(s->pinU,0);
     gpio_pwm_write(s->pinV,0);
     gpio_pwm_write(s->pinW,0);
     s->dir=0;
-//    if (!(HAVE_EDGE_OPTIMIZATION && s->flags & SF_SINGLE_SCHED))
-//        gpio_out_write(s->step_pin, s->flags & SF_INVERT_STEP);
+    //    if (!(HAVE_EDGE_OPTIMIZATION && s->flags & SF_SINGLE_SCHED))
+    //        gpio_out_write(s->step_pin, s->flags & SF_INVERT_STEP);
     while (!move_queue_empty(&s->mq)) {
         struct move_node *mn = move_queue_pop(&s->mq);
         struct stepper_move *m = container_of(mn, struct stepper_move, node);
@@ -375,7 +380,7 @@ command_stepper_stop_on_trigger(uint32_t *args)
     trsync_add_signal(ts, &s->stop_signal, stepper_stop);
 }
 DECL_COMMAND(command_stepper_stop_on_trigger,
-             "stepper_stop_on_trigger oid=%c trsync_oid=%c");
+        "stepper_stop_on_trigger oid=%c trsync_oid=%c");
 
 void
 stepper_shutdown(void)
