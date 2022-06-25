@@ -266,6 +266,9 @@ gpio_pwm_start(uint8_t pin1, uint8_t pin2, uint8_t pin3) {
         if (p3->pin == pin3)
             break;
     }
+   // p1->timer->CR1 |= TIM_CR1_CMS;//center-aligned mode 
+   // p2->timer->CR1 |= TIM_CR1_CMS;//center-aligned mode 
+  //  p3->timer->CR1 |= TIM_CR1_CMS;//center-aligned mode 
     p1->timer->CR1 |= TIM_CR1_CEN;
     p2->timer->CR1 |= TIM_CR1_CEN;
     p3->timer->CR1 |= TIM_CR1_CEN;
