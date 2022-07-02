@@ -176,6 +176,8 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
     if (!is_enabled_pclock((uint32_t) p->timer)) {
         enable_pclock((uint32_t) p->timer);
     }
+    
+    sendf("PWMFREQ  freq=%i", pclk/(prescaler+1*MAX_PWM));
 
     if (p->timer->CR1 & TIM_CR1_CEN) {
         if (p->timer->PSC != (uint16_t) prescaler) {
