@@ -1198,10 +1198,10 @@ config BLDC_POWER2
 
 config BLDC_POWER2_HOLDING
     depends on BLDC
-    int "BLDC Motor 2 holding PWM power in percent"
+    int "BLDC Motor 2 holding PWM power in percent from max. PWM power"
     default 40
     help
-        BLDC Motor 2 holding PWM power in percent
+        BLDC Motor 2 holding PWM power in percent  from max. PWM power
 
 config BLDC_FREQ
     depends on BLDC
