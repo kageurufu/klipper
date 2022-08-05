@@ -14,7 +14,7 @@
 #include "hardware/regs/resets.h" // RESETS_RESET_PWM_BITS
 
 #define MAX_PWM 255
-#define MAX_PWM_BLDC 4095
+#define MAX_PWM_BLDC 3174
 DECL_CONSTANT("PWM_MAX", MAX_PWM);
 
 struct gpio_pwm
@@ -134,7 +134,7 @@ gpio_pwm_setup_bldc(uint8_t pin, uint32_t cycle_time, uint8_t val) {
         div_frac = 0;
     }
 
-    uint32_t pwm_div = div_int << 4 | div_frac;
+    uint32_t pwm_div = 1 << 4 | 0;
 
     // Enable clock
     if (!is_enabled_pclock(RESETS_RESET_PWM_BITS))
@@ -150,7 +150,7 @@ gpio_pwm_setup_bldc(uint8_t pin, uint32_t cycle_time, uint8_t val) {
         slice->top = MAX_PWM_BLDC - 1;
         slice->ctr = PWM_CH0_CTR_RESET;
         slice->cc = PWM_CH0_CC_RESET;
-      //  slice->csr = PWM_CH0_CSR_EN_BITS; //is enabled from BLDC driver
+        slice->csr = PWM_CH0_CSR_PH_CORRECT_BITS ;//is enabled from BLDC driver
     } else {
         if (slice->div != pwm_div)
             shutdown("PWM pin has different cycle time from another in "
@@ -179,6 +179,12 @@ gpio_pwm_setup_bldc(uint8_t pin, uint32_t cycle_time, uint8_t val) {
 
 void
 gpio_pwm_start(uint8_t pin1, uint8_t pin2, uint8_t pin3) {
+     pwm_slice_hw_t * slice1 = &pwm_hw->slice[(pin1 >> 1) & 0x7];
+     pwm_slice_hw_t * slice2 = &pwm_hw->slice[(pin2 >> 1) & 0x7];
+     pwm_slice_hw_t * slice3 = &pwm_hw->slice[(pin3 >> 1) & 0x7];
+     slice1->cc=0;
+     slice2->cc=0;
+     slice3->cc=0;
     uint8_t mask1 = (1<< ((pin1 >> 1) & 0x7));
     uint8_t mask2 = (1<< ((pin2 >> 1) & 0x7));
     uint8_t mask3 = (1<< ((pin3 >> 1) & 0x7));
