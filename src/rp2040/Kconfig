@@ -83,7 +83,23 @@ choice
     config RP2040_SERIAL_UART0
         bool "Serial (on UART0 GPIO1/GPIO0)"
         select SERIAL
+    config RP2040_CANBUS
+        bool "CAN bus"
+        select CANSERIAL
+    config RP2040_USBCANBUS
+        bool "USB to CAN bus bridge"
+        select USBCANBUS
 endchoice
+
+config RP2040_CANBUS_GPIO_RX
+    int "CAN RX gpio number" if CANBUS
+    default 4
+    range 0 29
+
+config RP2040_CANBUS_GPIO_TX
+    int "CAN TX gpio number" if CANBUS
+    default 5
+    range 0 29
 
 config BLDC
     bool "Enable BLDC motor support for RP2040 and Simple FOC Shield"
