@@ -257,12 +257,6 @@ config BLDC_POWER0_HOLDING
     help
         BLDC Motor 0 holding PWM power in percent from max. PWM power
 
-config BLDC_FREQ
-    depends on BLDC
-    int "BLDC PWM frequency in kHz"
-    default 100
-    help
-        BLDC PWM frequency in kHz
 
 endmenu
 

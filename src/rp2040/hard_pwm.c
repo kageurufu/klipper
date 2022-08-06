@@ -99,7 +99,7 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val) {
 #ifdef CONFIG_BLDC
 
 struct gpio_pwm
-gpio_pwm_setup_bldc(uint8_t pin, uint32_t cycle_time, uint8_t val) {
+gpio_pwm_setup_bldc(uint8_t pin) {
     if(pin >= 30)
         shutdown("invalid gpio pin");
 
@@ -108,31 +108,6 @@ gpio_pwm_setup_bldc(uint8_t pin, uint32_t cycle_time, uint8_t val) {
     pwm_slice_hw_t * slice = &pwm_hw->slice[(pin >> 1) & 0x7];
     uint8_t channel = pin & 1;
 
-    // Map cycle_time to clock divider
-    // The rp2040 has an 8.4 fractional divider, so we'll map the requested
-    // cycle time into that. The cycle_time we receive from Klippy is in
-    // relation to the crystal frequency and so we need to scale it up to match
-    // the PWM clock.
-    // For better precision, we introduce a scale factor such that pclk * scale
-    // doesn't overflow. We then multiply by this scale factor at the beginning
-    // and divide by it at the end.
-    uint32_t pclk = get_pclock_frequency(RESETS_RESET_PWM_BITS);
-    uint32_t scale = 1 << __builtin_clz(pclk);
-    uint32_t clock_mult = (scale * get_pclock_frequency(RESETS_RESET_PWM_BITS))
-                          / CONFIG_CLOCK_FREQ;
-    uint32_t cycle_clocks = clock_mult * cycle_time;
-    uint32_t div_int = cycle_clocks / MAX_PWM_BLDC / scale;
-    uint32_t div_frac = (cycle_clocks - div_int * MAX_PWM_BLDC * scale) * 16
-                        / MAX_PWM_BLDC / scale;
-
-    // Clamp range of the divider
-    if(div_int > 255) {
-        div_int = 255;
-        div_frac = 15;
-    } else if(div_int < 1) {
-        div_int = 1;
-        div_frac = 0;
-    }
 
     uint32_t pwm_div = 1 << 4 | 0;
 
@@ -172,7 +147,7 @@ gpio_pwm_setup_bldc(uint8_t pin, uint32_t cycle_time, uint8_t val) {
     out.mask = channel ? PWM_CH0_CC_B_BITS : PWM_CH0_CC_A_BITS;
 
     gpio_peripheral(pin, IO_BANK0_GPIO0_CTRL_FUNCSEL_VALUE_PWM_A_0, 0);
-    gpio_pwm_write(out, val);
+    gpio_pwm_write(out, 0);
 
     return out;
 }
