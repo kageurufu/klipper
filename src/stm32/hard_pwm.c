@@ -11,7 +11,7 @@
 #include "internal.h" // GPIO
 #include "sched.h" // sched_shutdown
 
-#define MAX_PWM 255
+#define MAX_PWM 4095
 DECL_CONSTANT("PWM_MAX", MAX_PWM);
 
 struct gpio_pwm_info {
@@ -224,6 +224,8 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
         enable_pclock((uint32_t) p->timer);
     }
 
+    sendf("PWMFREQ  freq=%i", pclk/(prescaler+1*MAX_PWM));
+
     if (p->timer->CR1 & TIM_CR1_CEN) {
         if (p->timer->PSC != (uint16_t) prescaler) {
             shutdown("PWM already programmed at different speed");
@@ -280,13 +282,47 @@ gpio_pwm_setup(uint8_t pin, uint32_t cycle_time, uint8_t val){
             shutdown("Invalid PWM channel");
     }
     // Enable PWM output
+#ifndef CONFIG_BLDC
     p->timer->CR1 |= TIM_CR1_CEN;
+#endif
 #if CONFIG_MACH_STM32H7 || CONFIG_MACH_STM32G0
     p->timer->BDTR |= TIM_BDTR_MOE;
 #endif
     return channel;
 }
 
+#ifdef CONFIG_BLDC
+void
+gpio_pwm_start(uint8_t pin1, uint8_t pin2, uint8_t pin3) {
+    const struct gpio_pwm_info* p1 = pwm_regs;
+    const struct gpio_pwm_info* p2 = pwm_regs;
+    const struct gpio_pwm_info* p3 = pwm_regs;
+    for (;; p1++) {
+        if (p1 >= &pwm_regs[ARRAY_SIZE(pwm_regs)])
+            shutdown("Not a valid PWM pin");
+        if (p1->pin == pin1)
+            break;
+    }
+    for (;; p2++) {
+        if (p2 >= &pwm_regs[ARRAY_SIZE(pwm_regs)])
+            shutdown("Not a valid PWM pin");
+        if (p2->pin == pin2)
+            break;
+    }
+    for (;; p3++) {
+        if (p3 >= &pwm_regs[ARRAY_SIZE(pwm_regs)])
+            shutdown("Not a valid PWM pin");
+        if (p3->pin == pin3)
+            break;
+    }
+    // p1->timer->CR1 |= TIM_CR1_CMS; //center-aligned mode
+    // p2->timer->CR1 |= TIM_CR1_CMS; //center-aligned mode
+    // p3->timer->CR1 |= TIM_CR1_CMS; //center-aligned mode
+    p1->timer->CR1 |= TIM_CR1_CEN;
+    p2->timer->CR1 |= TIM_CR1_CEN;
+    p3->timer->CR1 |= TIM_CR1_CEN;
+}
+#endif
 void
 gpio_pwm_write(struct gpio_pwm g, uint32_t val) {
     *(volatile uint32_t*) g.reg = val;

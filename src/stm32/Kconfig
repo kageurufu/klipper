@@ -456,4 +456,868 @@ config STM32_CANBUS_PC2_PC3
     bool
     default y if STM32_MMENU_CANBUS_PC2_PC3 || STM32_CMENU_CANBUS_PC2_PC3
 
+
+
+config BLDC
+    bool "Enable BLDC motor support for STM32F401 NUCLEO and Simple FOC Shield"
+    default n
+    help
+        Enable BLDC motor support for STM32F401 NUCLEO and Simple FOC Shield
+
+menu "BLDC"
+depends on BLDC
+
+choice
+    prompt "GPIO pin for BLDC Motor 0 PWM A"
+    depends on BLDC
+    config BLDC_PWM0A_PB1
+        bool "PB1"
+    config BLDC_PWM0A_PB3
+        bool "PB3"
+    config BLDC_PWM0A_PA0
+        bool "PA0"
+    config BLDC_PWM0A_PA1
+        bool "PA1"
+    config BLDC_PWM0A_PA5
+        bool "PA5"
+    config BLDC_PWM0A_PA6
+        bool "PA6"
+    config BLDC_PWM0A_PA7
+        bool "PA7"
+    config BLDC_PWM0A_PA8
+        bool "PA8"
+    config BLDC_PWM0A_PA9
+        bool "PA9"
+    config BLDC_PWM0A_PA10
+        bool "PA10"
+    config BLDC_PWM0A_PA11
+        bool "PA11"
+    config BLDC_PWM0A_PA15
+        bool "PA15"
+    config BLDC_PWM0A_PB0
+        bool "PB0"
+    config BLDC_PWM0A_PB4
+        bool "PB4"
+    config BLDC_PWM0A_PB5
+        bool "PB5"
+    config BLDC_PWM0A_PB6
+        bool "PB6"
+    config BLDC_PWM0A_PB7
+        bool "PB7"
+    config BLDC_PWM0A_PB8
+        bool "PB8"
+    config BLDC_PWM0A_PB9
+        bool "PB9"
+    config BLDC_PWM0A_PB10
+        bool "PB10"
+    config BLDC_PWM0A_PB13
+        bool "PB13"
+    config BLDC_PWM0A_PB14
+        bool "PB14"
+    config BLDC_PWM0A_PB15
+        bool "PB15"
+    config BLDC_PWM0A_PC6
+        bool "PC6"
+    config BLDC_PWM0A_PC7
+        bool "PC7"
+    config BLDC_PWM0A_PC8
+        bool "PC8"
+    config BLDC_PWM0A_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM0A
+    int
+    default 0 if BLDC_PWM0A_PA0
+    default 1 if BLDC_PWM0A_PA1
+    default 5 if BLDC_PWM0A_PA5
+    default 6 if BLDC_PWM0A_PA6
+    default 7 if BLDC_PWM0A_PA7
+    default 8 if BLDC_PWM0A_PA8
+    default 9 if BLDC_PWM0A_PA9
+    default 10 if BLDC_PWM0A_PA10
+    default 11 if BLDC_PWM0A_PA11
+    default 15 if BLDC_PWM0A_PA15
+    default 16 if BLDC_PWM0A_PB0
+    default 17 if BLDC_PWM0A_PB1
+    default 19 if BLDC_PWM0A_PB3
+    default 20 if BLDC_PWM0A_PB4
+    default 21 if BLDC_PWM0A_PB5
+    default 22 if BLDC_PWM0A_PB6
+    default 23 if BLDC_PWM0A_PB7
+    default 24 if BLDC_PWM0A_PB8
+    default 25 if BLDC_PWM0A_PB9
+    default 26 if BLDC_PWM0A_PB10
+    default 29 if BLDC_PWM0A_PB13
+    default 30 if BLDC_PWM0A_PB14
+    default 31 if BLDC_PWM0A_PB15
+    default 38 if BLDC_PWM0A_PC6
+    default 39 if BLDC_PWM0A_PC7
+    default 40 if BLDC_PWM0A_PC8
+    default 41 if BLDC_PWM0A_PC9
+
+
+
+choice
+    prompt "GPIO pin for BLDC Motor 0 PWM B"
+    depends on BLDC
+    config BLDC_PWM0B_PB4
+        bool "PB4"
+    config BLDC_PWM0B_PA0
+        bool "PA0"
+    config BLDC_PWM0B_PA1
+        bool "PA1"
+    config BLDC_PWM0B_PA5
+        bool "PA5"
+    config BLDC_PWM0B_PA6
+        bool "PA6"
+    config BLDC_PWM0B_PA7
+        bool "PA7"
+    config BLDC_PWM0B_PA8
+        bool "PA8"
+    config BLDC_PWM0B_PA9
+        bool "PA9"
+    config BLDC_PWM0B_PA10
+        bool "PA10"
+    config BLDC_PWM0B_PA11
+        bool "PA11"
+    config BLDC_PWM0B_PA15
+        bool "PA15"
+    config BLDC_PWM0B_PB0
+        bool "PB0"
+    config BLDC_PWM0B_PB1
+        bool "PB1"
+    config BLDC_PWM0B_PB3
+        bool "PB3"
+    config BLDC_PWM0B_PB5
+        bool "PB5"
+    config BLDC_PWM0B_PB6
+        bool "PB6"
+    config BLDC_PWM0B_PB7
+        bool "PB7"
+    config BLDC_PWM0B_PB8
+        bool "PB8"
+    config BLDC_PWM0B_PB9
+        bool "PB9"
+    config BLDC_PWM0B_PB10
+        bool "PB10"
+    config BLDC_PWM0B_PB13
+        bool "PB13"
+    config BLDC_PWM0B_PB14
+        bool "PB14"
+    config BLDC_PWM0B_PB15
+        bool "PB15"
+    config BLDC_PWM0B_PC6
+        bool "PC6"
+    config BLDC_PWM0B_PC7
+        bool "PC7"
+    config BLDC_PWM0B_PC8
+        bool "PC8"
+    config BLDC_PWM0B_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM0B
+    int
+    default 0 if BLDC_PWM0B_PA0
+    default 1 if BLDC_PWM0B_PA1
+    default 5 if BLDC_PWM0B_PA5
+    default 6 if BLDC_PWM0B_PA6
+    default 7 if BLDC_PWM0B_PA7
+    default 8 if BLDC_PWM0B_PA8
+    default 9 if BLDC_PWM0B_PA9
+    default 10 if BLDC_PWM0B_PA10
+    default 11 if BLDC_PWM0B_PA11
+    default 15 if BLDC_PWM0B_PA15
+    default 16 if BLDC_PWM0B_PB0
+    default 17 if BLDC_PWM0B_PB1
+    default 19 if BLDC_PWM0B_PB3
+    default 20 if BLDC_PWM0B_PB4
+    default 21 if BLDC_PWM0B_PB5
+    default 22 if BLDC_PWM0B_PB6
+    default 23 if BLDC_PWM0B_PB7
+    default 24 if BLDC_PWM0B_PB8
+    default 25 if BLDC_PWM0B_PB9
+    default 26 if BLDC_PWM0B_PB10
+    default 29 if BLDC_PWM0B_PB13
+    default 30 if BLDC_PWM0B_PB14
+    default 31 if BLDC_PWM0B_PB15
+    default 38 if BLDC_PWM0B_PC6
+    default 39 if BLDC_PWM0B_PC7
+    default 40 if BLDC_PWM0B_PC8
+    default 41 if BLDC_PWM0B_PC9
+
+
+choice
+    prompt "GPIO pin for BLDC Motor 0 PWM C"
+    depends on BLDC
+    config BLDC_PWM0C_PB10
+        bool "PB10"
+    config BLDC_PWM0C_PA0
+        bool "PA0"
+    config BLDC_PWM0C_PA1
+        bool "PA1"
+    config BLDC_PWM0C_PA5
+        bool "PA5"
+    config BLDC_PWM0C_PA6
+        bool "PA6"
+    config BLDC_PWM0C_PA7
+        bool "PA7"
+    config BLDC_PWM0C_PA8
+        bool "PA8"
+    config BLDC_PWM0C_PA9
+        bool "PA9"
+    config BLDC_PWM0C_PA10
+        bool "PA10"
+    config BLDC_PWM0C_PA11
+        bool "PA11"
+    config BLDC_PWM0C_PA15
+        bool "PA15"
+    config BLDC_PWM0C_PB0
+        bool "PB0"
+    config BLDC_PWM0C_PB1
+        bool "PB1"
+    config BLDC_PWM0C_PB3
+        bool "PB3"
+    config BLDC_PWM0C_PB4
+        bool "PB4"
+    config BLDC_PWM0C_PB5
+        bool "PB5"
+    config BLDC_PWM0C_PB6
+        bool "PB6"
+    config BLDC_PWM0C_PB7
+        bool "PB7"
+    config BLDC_PWM0C_PB8
+        bool "PB8"
+    config BLDC_PWM0C_PB9
+        bool "PB9"
+    config BLDC_PWM0C_PB13
+        bool "PB13"
+    config BLDC_PWM0C_PB14
+        bool "PB14"
+    config BLDC_PWM0C_PB15
+        bool "PB15"
+    config BLDC_PWM0C_PC6
+        bool "PC6"
+    config BLDC_PWM0C_PC7
+        bool "PC7"
+    config BLDC_PWM0C_PC8
+        bool "PC8"
+    config BLDC_PWM0C_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM0C
+    int
+    default 0 if BLDC_PWM0C_PA0
+    default 1 if BLDC_PWM0C_PA1
+    default 5 if BLDC_PWM0C_PA5
+    default 6 if BLDC_PWM0C_PA6
+    default 7 if BLDC_PWM0C_PA7
+    default 8 if BLDC_PWM0C_PA8
+    default 9 if BLDC_PWM0C_PA9
+    default 10 if BLDC_PWM0C_PA10
+    default 11 if BLDC_PWM0C_PA11
+    default 15 if BLDC_PWM0C_PA15
+    default 16 if BLDC_PWM0C_PB0
+    default 17 if BLDC_PWM0C_PB1
+    default 19 if BLDC_PWM0C_PB3
+    default 20 if BLDC_PWM0C_PB4
+    default 21 if BLDC_PWM0C_PB5
+    default 22 if BLDC_PWM0C_PB6
+    default 23 if BLDC_PWM0C_PB7
+    default 24 if BLDC_PWM0C_PB8
+    default 25 if BLDC_PWM0C_PB9
+    default 26 if BLDC_PWM0C_PB10
+    default 29 if BLDC_PWM0C_PB13
+    default 30 if BLDC_PWM0C_PB14
+    default 31 if BLDC_PWM0C_PB15
+    default 38 if BLDC_PWM0C_PC6
+    default 39 if BLDC_PWM0C_PC7
+    default 40 if BLDC_PWM0C_PC8
+    default 41 if BLDC_PWM0C_PC9
+
+config BLDC_POWER0
+    depends on BLDC
+    int "BLDC Motor 0 max. PWM power in percent"
+    default 60
+    help
+        BLDC Motor 0 max. PWM power in percent
+
+config BLDC_POWER0_HOLDING
+    depends on BLDC
+    int "BLDC Motor 0 holding PWM power in percent"
+    default 40
+    help
+        BLDC Motor 0 holding PWM power in percent
+
+choice
+    prompt "GPIO pin for BLDC Motor 1 PWM A"
+    depends on BLDC
+    config BLDC_PWM1A_PC6
+        bool "PC6"
+    config BLDC_PWM1A_PA0
+        bool "PA0"
+    config BLDC_PWM1A_PA1
+        bool "PA1"
+    config BLDC_PWM1A_PA5
+        bool "PA5"
+    config BLDC_PWM1A_PA6
+        bool "PA6"
+    config BLDC_PWM1A_PA7
+        bool "PA7"
+    config BLDC_PWM1A_PA8
+        bool "PA8"
+    config BLDC_PWM1A_PA9
+        bool "PA9"
+    config BLDC_PWM1A_PA10
+        bool "PA10"
+    config BLDC_PWM1A_PA11
+        bool "PA11"
+    config BLDC_PWM1A_PA15
+        bool "PA15"
+    config BLDC_PWM1A_PB0
+        bool "PB0"
+    config BLDC_PWM1A_PB1
+        bool "PB1"
+    config BLDC_PWM1A_PB3
+        bool "PB3"
+    config BLDC_PWM1A_PB4
+        bool "PB4"
+    config BLDC_PWM1A_PB5
+        bool "PB5"
+    config BLDC_PWM1A_PB6
+        bool "PB6"
+    config BLDC_PWM1A_PB7
+        bool "PB7"
+    config BLDC_PWM1A_PB8
+        bool "PB8"
+    config BLDC_PWM1A_PB9
+        bool "PB9"
+    config BLDC_PWM1A_PB10
+        bool "PB10"
+    config BLDC_PWM1A_PB13
+        bool "PB13"
+    config BLDC_PWM1A_PB14
+        bool "PB14"
+    config BLDC_PWM1A_PB15
+        bool "PB15"
+    config BLDC_PWM1A_PC7
+        bool "PC7"
+    config BLDC_PWM1A_PC8
+        bool "PC8"
+    config BLDC_PWM1A_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM1A
+    int
+    default 0 if BLDC_PWM1A_PA0
+    default 1 if BLDC_PWM1A_PA1
+    default 5 if BLDC_PWM1A_PA5
+    default 6 if BLDC_PWM1A_PA6
+    default 7 if BLDC_PWM1A_PA7
+    default 8 if BLDC_PWM1A_PA8
+    default 9 if BLDC_PWM1A_PA9
+    default 10 if BLDC_PWM1A_PA10
+    default 11 if BLDC_PWM1A_PA11
+    default 15 if BLDC_PWM1A_PA15
+    default 16 if BLDC_PWM1A_PB0
+    default 17 if BLDC_PWM1A_PB1
+    default 19 if BLDC_PWM1A_PB3
+    default 20 if BLDC_PWM1A_PB4
+    default 21 if BLDC_PWM1A_PB5
+    default 22 if BLDC_PWM1A_PB6
+    default 23 if BLDC_PWM1A_PB7
+    default 24 if BLDC_PWM1A_PB8
+    default 25 if BLDC_PWM1A_PB9
+    default 26 if BLDC_PWM1A_PB10
+    default 29 if BLDC_PWM1A_PB13
+    default 30 if BLDC_PWM1A_PB14
+    default 31 if BLDC_PWM1A_PB15
+    default 38 if BLDC_PWM1A_PC6
+    default 39 if BLDC_PWM1A_PC7
+    default 40 if BLDC_PWM1A_PC8
+    default 41 if BLDC_PWM1A_PC9
+
+choice
+    prompt "GPIO pin for BLDC Motor 1 PWM B"
+    depends on BLDC
+    config BLDC_PWM1B_PC7
+        bool "PC7"
+    config BLDC_PWM1B_PA0
+        bool "PA0"
+    config BLDC_PWM1B_PA1
+        bool "PA1"
+    config BLDC_PWM1B_PA5
+        bool "PA5"
+    config BLDC_PWM1B_PA6
+        bool "PA6"
+    config BLDC_PWM1B_PA7
+        bool "PA7"
+    config BLDC_PWM1B_PA8
+        bool "PA8"
+    config BLDC_PWM1B_PA9
+        bool "PA9"
+    config BLDC_PWM1B_PA10
+        bool "PA10"
+    config BLDC_PWM1B_PA11
+        bool "PA11"
+    config BLDC_PWM1B_PA15
+        bool "PA15"
+    config BLDC_PWM1B_PB0
+        bool "PB0"
+    config BLDC_PWM1B_PB1
+        bool "PB1"
+    config BLDC_PWM1B_PB3
+        bool "PB3"
+    config BLDC_PWM1B_PB4
+        bool "PB4"
+    config BLDC_PWM1B_PB5
+        bool "PB5"
+    config BLDC_PWM1B_PB6
+        bool "PB6"
+    config BLDC_PWM1B_PB7
+        bool "PB7"
+    config BLDC_PWM1B_PB8
+        bool "PB8"
+    config BLDC_PWM1B_PB9
+        bool "PB9"
+    config BLDC_PWM1B_PB10
+        bool "PB10"
+    config BLDC_PWM1B_PB13
+        bool "PB13"
+    config BLDC_PWM1B_PB14
+        bool "PB14"
+    config BLDC_PWM1B_PB15
+        bool "PB15"
+    config BLDC_PWM1B_PC6
+        bool "PC6"
+    config BLDC_PWM1B_PC8
+        bool "PC8"
+    config BLDC_PWM1B_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM1B
+    int
+    default 0 if BLDC_PWM1B_PA0
+    default 1 if BLDC_PWM1B_PA1
+    default 5 if BLDC_PWM1B_PA5
+    default 6 if BLDC_PWM1B_PA6
+    default 7 if BLDC_PWM1B_PA7
+    default 8 if BLDC_PWM1B_PA8
+    default 9 if BLDC_PWM1B_PA9
+    default 10 if BLDC_PWM1B_PA10
+    default 11 if BLDC_PWM1B_PA11
+    default 15 if BLDC_PWM1B_PA15
+    default 16 if BLDC_PWM1B_PB0
+    default 17 if BLDC_PWM1B_PB1
+    default 19 if BLDC_PWM1B_PB3
+    default 20 if BLDC_PWM1B_PB4
+    default 21 if BLDC_PWM1B_PB5
+    default 22 if BLDC_PWM1B_PB6
+    default 23 if BLDC_PWM1B_PB7
+    default 24 if BLDC_PWM1B_PB8
+    default 25 if BLDC_PWM1B_PB9
+    default 26 if BLDC_PWM1B_PB10
+    default 29 if BLDC_PWM1B_PB13
+    default 30 if BLDC_PWM1B_PB14
+    default 31 if BLDC_PWM1B_PB15
+    default 38 if BLDC_PWM1B_PC6
+    default 39 if BLDC_PWM1B_PC7
+    default 40 if BLDC_PWM1B_PC8
+    default 41 if BLDC_PWM1B_PC9
+
+choice
+    prompt "GPIO pin for BLDC Motor 1 PWM C"
+    depends on BLDC
+    config BLDC_PWM1C_PA0
+        bool "PA0"
+    config BLDC_PWM1C_PA1
+        bool "PA1"
+    config BLDC_PWM1C_PA5
+        bool "PA5"
+    config BLDC_PWM1C_PA6
+        bool "PA6"
+    config BLDC_PWM1C_PA7
+        bool "PA7"
+    config BLDC_PWM1C_PA8
+        bool "PA8"
+    config BLDC_PWM1C_PA9
+        bool "PA9"
+    config BLDC_PWM1C_PA10
+        bool "PA10"
+    config BLDC_PWM1C_PA11
+        bool "PA11"
+    config BLDC_PWM1C_PA15
+        bool "PA15"
+    config BLDC_PWM1C_PB0
+        bool "PB0"
+    config BLDC_PWM1C_PB1
+        bool "PB1"
+    config BLDC_PWM1C_PB3
+        bool "PB3"
+    config BLDC_PWM1C_PB4
+        bool "PB4"
+    config BLDC_PWM1C_PB5
+        bool "PB5"
+    config BLDC_PWM1C_PB6
+        bool "PB6"
+    config BLDC_PWM1C_PB7
+        bool "PB7"
+    config BLDC_PWM1C_PB8
+        bool "PB8"
+    config BLDC_PWM1C_PB9
+        bool "PB9"
+    config BLDC_PWM1C_PB10
+        bool "PB10"
+    config BLDC_PWM1C_PB13
+        bool "PB13"
+    config BLDC_PWM1C_PB14
+        bool "PB14"
+    config BLDC_PWM1C_PB15
+        bool "PB15"
+    config BLDC_PWM1C_PC6
+        bool "PC6"
+    config BLDC_PWM1C_PC7
+        bool "PC7"
+    config BLDC_PWM1C_PC8
+        bool "PC8"
+    config BLDC_PWM1C_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM1C
+    int
+    default 0 if BLDC_PWM1C_PA0
+    default 1 if BLDC_PWM1C_PA1
+    default 5 if BLDC_PWM1C_PA5
+    default 6 if BLDC_PWM1C_PA6
+    default 7 if BLDC_PWM1C_PA7
+    default 8 if BLDC_PWM1C_PA8
+    default 9 if BLDC_PWM1C_PA9
+    default 10 if BLDC_PWM1C_PA10
+    default 11 if BLDC_PWM1C_PA11
+    default 15 if BLDC_PWM1C_PA15
+    default 16 if BLDC_PWM1C_PB0
+    default 17 if BLDC_PWM1C_PB1
+    default 19 if BLDC_PWM1C_PB3
+    default 20 if BLDC_PWM1C_PB4
+    default 21 if BLDC_PWM1C_PB5
+    default 22 if BLDC_PWM1C_PB6
+    default 23 if BLDC_PWM1C_PB7
+    default 24 if BLDC_PWM1C_PB8
+    default 25 if BLDC_PWM1C_PB9
+    default 26 if BLDC_PWM1C_PB10
+    default 29 if BLDC_PWM1C_PB13
+    default 30 if BLDC_PWM1C_PB14
+    default 31 if BLDC_PWM1C_PB15
+    default 38 if BLDC_PWM1C_PC6
+    default 39 if BLDC_PWM1C_PC7
+    default 40 if BLDC_PWM1C_PC8
+    default 41 if BLDC_PWM1C_PC9
+
+config BLDC_POWER1
+    depends on BLDC
+    int "BLDC Motor 1 max. PWM power in percent"
+    default 60
+    help
+        BLDC Motor 1 max. PWM power in percent
+
+config BLDC_POWER1_HOLDING
+    depends on BLDC
+    int "BLDC Motor 1 holding PWM power in percent"
+    default 40
+    help
+        BLDC Motor 1 holding PWM power in percent
+
+choice
+    prompt "GPIO pin for BLDC Motor 2 PWM A"
+    depends on BLDC
+    config BLDC_PWM2A_PA15
+        bool "PA15"
+    config BLDC_PWM2A_PA0
+        bool "PA0"
+    config BLDC_PWM2A_PA1
+        bool "PA1"
+    config BLDC_PWM2A_PA5
+        bool "PA5"
+    config BLDC_PWM2A_PA6
+        bool "PA6"
+    config BLDC_PWM2A_PA7
+        bool "PA7"
+    config BLDC_PWM2A_PA8
+        bool "PA8"
+    config BLDC_PWM2A_PA9
+        bool "PA9"
+    config BLDC_PWM2A_PA10
+        bool "PA10"
+    config BLDC_PWM2A_PA11
+        bool "PA11"
+    config BLDC_PWM2A_PB0
+        bool "PB0"
+    config BLDC_PWM2A_PB1
+        bool "PB1"
+    config BLDC_PWM2A_PB3
+        bool "PB3"
+    config BLDC_PWM2A_PB4
+        bool "PB4"
+    config BLDC_PWM2A_PB5
+        bool "PB5"
+    config BLDC_PWM2A_PB6
+        bool "PB6"
+    config BLDC_PWM2A_PB7
+        bool "PB7"
+    config BLDC_PWM2A_PB8
+        bool "PB8"
+    config BLDC_PWM2A_PB9
+        bool "PB9"
+    config BLDC_PWM2A_PB10
+        bool "PB10"
+    config BLDC_PWM2A_PB13
+        bool "PB13"
+    config BLDC_PWM2A_PB14
+        bool "PB14"
+    config BLDC_PWM2A_PB15
+        bool "PB15"
+    config BLDC_PWM2A_PC6
+        bool "PC6"
+    config BLDC_PWM2A_PC7
+        bool "PC7"
+    config BLDC_PWM2A_PC8
+        bool "PC8"
+    config BLDC_PWM2A_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM2A
+    int
+    default 0 if BLDC_PWM2A_PA0
+    default 1 if BLDC_PWM2A_PA1
+    default 5 if BLDC_PWM2A_PA5
+    default 6 if BLDC_PWM2A_PA6
+    default 7 if BLDC_PWM2A_PA7
+    default 8 if BLDC_PWM2A_PA8
+    default 9 if BLDC_PWM2A_PA9
+    default 10 if BLDC_PWM2A_PA10
+    default 11 if BLDC_PWM2A_PA11
+    default 15 if BLDC_PWM2A_PA15
+    default 16 if BLDC_PWM2A_PB0
+    default 17 if BLDC_PWM2A_PB1
+    default 19 if BLDC_PWM2A_PB3
+    default 20 if BLDC_PWM2A_PB4
+    default 21 if BLDC_PWM2A_PB5
+    default 22 if BLDC_PWM2A_PB6
+    default 23 if BLDC_PWM2A_PB7
+    default 24 if BLDC_PWM2A_PB8
+    default 25 if BLDC_PWM2A_PB9
+    default 26 if BLDC_PWM2A_PB10
+    default 29 if BLDC_PWM2A_PB13
+    default 30 if BLDC_PWM2A_PB14
+    default 31 if BLDC_PWM2A_PB15
+    default 38 if BLDC_PWM2A_PC6
+    default 39 if BLDC_PWM2A_PC7
+    default 40 if BLDC_PWM2A_PC8
+
+choice
+    prompt "GPIO pin for BLDC Motor 2 PWM B"
+    depends on BLDC
+    config BLDC_PWM2B_PB13
+        bool "PB13"
+    config BLDC_PWM2B_PA0
+        bool "PA0"
+    config BLDC_PWM2B_PA1
+        bool "PA1"
+    config BLDC_PWM2B_PA5
+        bool "PA5"
+    config BLDC_PWM2B_PA6
+        bool "PA6"
+    config BLDC_PWM2B_PA7
+        bool "PA7"
+    config BLDC_PWM2B_PA8
+        bool "PA8"
+    config BLDC_PWM2B_PA9
+        bool "PA9"
+    config BLDC_PWM2B_PA10
+        bool "PA10"
+    config BLDC_PWM2B_PA11
+        bool "PA11"
+    config BLDC_PWM2B_PA15
+        bool "PA15"
+    config BLDC_PWM2B_PB0
+        bool "PB0"
+    config BLDC_PWM2B_PB1
+        bool "PB1"
+    config BLDC_PWM2B_PB3
+        bool "PB3"
+    config BLDC_PWM2B_PB4
+        bool "PB4"
+    config BLDC_PWM2B_PB5
+        bool "PB5"
+    config BLDC_PWM2B_PB6
+        bool "PB6"
+    config BLDC_PWM2B_PB7
+        bool "PB7"
+    config BLDC_PWM2B_PB8
+        bool "PB8"
+    config BLDC_PWM2B_PB9
+        bool "PB9"
+    config BLDC_PWM2B_PB10
+        bool "PB10"
+    config BLDC_PWM2B_PB14
+        bool "PB14"
+    config BLDC_PWM2B_PB15
+        bool "PB15"
+    config BLDC_PWM2B_PC6
+        bool "PC6"
+    config BLDC_PWM2B_PC7
+        bool "PC7"
+    config BLDC_PWM2B_PC8
+        bool "PC8"
+    config BLDC_PWM2B_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM2B
+    int
+    default 0 if BLDC_PWM2B_PA0
+    default 1 if BLDC_PWM2B_PA1
+    default 5 if BLDC_PWM2B_PA5
+    default 6 if BLDC_PWM2B_PA6
+    default 7 if BLDC_PWM2B_PA7
+    default 8 if BLDC_PWM2B_PA8
+    default 9 if BLDC_PWM2B_PA9
+    default 10 if BLDC_PWM2B_PA10
+    default 11 if BLDC_PWM2B_PA11
+    default 15 if BLDC_PWM2B_PA15
+    default 16 if BLDC_PWM2B_PB0
+    default 17 if BLDC_PWM2B_PB1
+    default 19 if BLDC_PWM2B_PB3
+    default 20 if BLDC_PWM2B_PB4
+    default 21 if BLDC_PWM2B_PB5
+    default 22 if BLDC_PWM2B_PB6
+    default 23 if BLDC_PWM2B_PB7
+    default 24 if BLDC_PWM2B_PB8
+    default 25 if BLDC_PWM2B_PB9
+    default 26 if BLDC_PWM2B_PB10
+    default 29 if BLDC_PWM2B_PB13
+    default 30 if BLDC_PWM2B_PB14
+    default 31 if BLDC_PWM2B_PB15
+    default 38 if BLDC_PWM2B_PC6
+    default 39 if BLDC_PWM2B_PC7
+    default 40 if BLDC_PWM2B_PC8
+    default 41 if BLDC_PWM2B_PC9
+
+choice
+    prompt "GPIO pin for BLDC Motor 2 PWM C"
+    depends on BLDC
+    config BLDC_PWM2C_PB14
+        bool "PB14"
+    config BLDC_PWM2C_PA0
+        bool "PA0"
+    config BLDC_PWM2C_PA1
+        bool "PA1"
+    config BLDC_PWM2C_PA5
+        bool "PA5"
+    config BLDC_PWM2C_PA6
+        bool "PA6"
+    config BLDC_PWM2C_PA7
+        bool "PA7"
+    config BLDC_PWM2C_PA8
+        bool "PA8"
+    config BLDC_PWM2C_PA9
+        bool "PA9"
+    config BLDC_PWM2C_PA10
+        bool "PA10"
+    config BLDC_PWM2C_PA11
+        bool "PA11"
+    config BLDC_PWM2C_PA15
+        bool "PA15"
+    config BLDC_PWM2C_PB0
+        bool "PB0"
+    config BLDC_PWM2C_PB1
+        bool "PB1"
+    config BLDC_PWM2C_PB3
+        bool "PB3"
+    config BLDC_PWM2C_PB4
+        bool "PB4"
+    config BLDC_PWM2C_PB5
+        bool "PB5"
+    config BLDC_PWM2C_PB6
+        bool "PB6"
+    config BLDC_PWM2C_PB7
+        bool "PB7"
+    config BLDC_PWM2C_PB8
+        bool "PB8"
+    config BLDC_PWM2C_PB9
+        bool "PB9"
+    config BLDC_PWM2C_PB10
+        bool "PB10"
+    config BLDC_PWM2C_PB13
+        bool "PB13"
+    config BLDC_PWM2C_PB15
+        bool "PB15"
+    config BLDC_PWM2C_PC6
+        bool "PC6"
+    config BLDC_PWM2C_PC7
+        bool "PC7"
+    config BLDC_PWM2C_PC8
+        bool "PC8"
+    config BLDC_PWM2C_PC9
+        bool "PC9"
+endchoice
+
+config BLDC_PWM2C
+    int
+    default 0 if BLDC_PWM2C_PA0
+    default 1 if BLDC_PWM2C_PA1
+    default 5 if BLDC_PWM2C_PA5
+    default 6 if BLDC_PWM2C_PA6
+    default 7 if BLDC_PWM2C_PA7
+    default 8 if BLDC_PWM2C_PA8
+    default 9 if BLDC_PWM2C_PA9
+    default 10 if BLDC_PWM2C_PA10
+    default 11 if BLDC_PWM2C_PA11
+    default 15 if BLDC_PWM2C_PA15
+    default 16 if BLDC_PWM2C_PB0
+    default 17 if BLDC_PWM2C_PB1
+    default 19 if BLDC_PWM2C_PB3
+    default 20 if BLDC_PWM2C_PB4
+    default 21 if BLDC_PWM2C_PB5
+    default 22 if BLDC_PWM2C_PB6
+    default 23 if BLDC_PWM2C_PB7
+    default 24 if BLDC_PWM2C_PB8
+    default 25 if BLDC_PWM2C_PB9
+    default 26 if BLDC_PWM2C_PB10
+    default 29 if BLDC_PWM2C_PB13
+    default 30 if BLDC_PWM2C_PB14
+    default 31 if BLDC_PWM2C_PB15
+    default 38 if BLDC_PWM2C_PC6
+    default 39 if BLDC_PWM2C_PC7
+    default 40 if BLDC_PWM2C_PC8
+    default 41 if BLDC_PWM2C_PC9
+
+config BLDC_POWER2
+    depends on BLDC
+    int "BLDC Motor 2 max. PWM power in percent"
+    default 60
+    help
+        BLDC Motor 2 max. PWM power in percent
+
+config BLDC_POWER2_HOLDING
+    depends on BLDC
+    int "BLDC Motor 2 holding PWM power in percent from max. PWM power"
+    default 40
+    help
+        BLDC Motor 2 holding PWM power in percent  from max. PWM power
+
+config BLDC_FREQ
+    depends on BLDC
+    int "BLDC PWM frequency in kHz"
+    default 100
+    help
+        BLDC PWM frequency in kHz
+
+endmenu
 endif

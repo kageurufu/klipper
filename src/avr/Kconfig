@@ -149,4 +149,12 @@ config SIMULAVR
 
          If unsure, select "N".
 
+
+config SimpleFOC
+    bool "Enable BLDC motor support for Arduino UNO and Simple FOC Shield"
+    default n
+    help
+        Enable BLDC motor support for Arduino UNO and Simple FOC Shield. The pins are hardcoded, please see "src/avr/bldc_stepper.c"
+
+
 endif

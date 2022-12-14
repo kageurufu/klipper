@@ -173,7 +173,7 @@ move_finalize(void)
         shutdown("Already finalized");
     struct move_queue_head dummy;
     move_queue_setup(&dummy, sizeof(*move_free_list));
-    move_list = alloc_chunks(move_item_size, 1024, &move_count);
+    move_list = alloc_chunks(move_item_size, 3900, &move_count);
     move_reset();
 }
 
@@ -245,7 +245,7 @@ void
 command_get_config(uint32_t *args)
 {
     sendf("config is_config=%c crc=%u is_shutdown=%c move_count=%hu"
-          , is_finalized(), config_crc, sched_is_shutdown(), move_count);
+          , is_finalized(), config_crc, sched_is_shutdown(), 1024);
 }
 DECL_COMMAND_FLAGS(command_get_config, HF_IN_SHUTDOWN, "get_config");
 

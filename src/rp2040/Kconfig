@@ -120,4 +120,199 @@ config RP2040_CANBUS_GPIO_TX
     default 5
     range 0 29
 
+config BLDC
+    bool "Enable BLDC motor support for RP2040 and Simple FOC Shield"
+    default n
+    help
+        Enable BLDC motor support for RP2040 and Simple FOC Shield
+
+menu "BLDC"
+depends on BLDC
+
+choice
+    prompt "GPIO pin for BLDC Motor 0 PWM A"
+    depends on BLDC
+    config BLDC_PWM0A_0
+        bool "gpio0"
+    config BLDC_PWM0A_1
+        bool "gpio1"
+    config BLDC_PWM0A_2
+        bool "gpio2"
+    config BLDC_PWM0A_3
+        bool "gpio3"
+    config BLDC_PWM0A_4
+        bool "gpio4"
+    config BLDC_PWM0A_5
+        bool "gpio5"
+    config BLDC_PWM0A_6
+        bool "gpio6"
+    config BLDC_PWM0A_7
+        bool "gpio7"
+    config BLDC_PWM0A_8
+        bool "gpio8"
+    config BLDC_PWM0A_9
+        bool "gpio9"
+    config BLDC_PWM0A_10
+        bool "gpio10"
+    config BLDC_PWM0A_11
+        bool "gpio11"
+    config BLDC_PWM0A_12
+        bool "gpio12"
+    config BLDC_PWM0A_13
+        bool "gpio13"
+    config BLDC_PWM0A_14
+        bool "gpio14"
+    config BLDC_PWM0A_15
+        bool "gpio15"
+endchoice
+
+config BLDC_PWM0A
+    int
+    default 0 if BLDC_PWM0A_0
+    default 1 if BLDC_PWM0A_1
+    default 2 if BLDC_PWM0A_2
+    default 3 if BLDC_PWM0A_3
+    default 4 if BLDC_PWM0A_4
+    default 5 if BLDC_PWM0A_5
+    default 6 if BLDC_PWM0A_6
+    default 7 if BLDC_PWM0A_7
+    default 8 if BLDC_PWM0A_8
+    default 9 if BLDC_PWM0A_9
+    default 10 if BLDC_PWM0A_10
+    default 11 if BLDC_PWM0A_11
+    default 12 if BLDC_PWM0A_12
+    default 13 if BLDC_PWM0A_13
+    default 14 if BLDC_PWM0A_14
+    default 15 if BLDC_PWM0A_15
+  
+choice
+    prompt "GPIO pin for BLDC Motor 0 PWM B"
+    depends on BLDC
+    config BLDC_PWM0B_1
+        bool "gpio1"
+    config BLDC_PWM0B_0
+        bool "gpio0"
+    config BLDC_PWM0B_2
+        bool "gpio2"
+    config BLDC_PWM0B_3
+        bool "gpio3"
+    config BLDC_PWM0B_4
+        bool "gpio4"
+    config BLDC_PWM0B_5
+        bool "gpio5"
+    config BLDC_PWM0B_6
+        bool "gpio6"
+    config BLDC_PWM0B_7
+        bool "gpio7"
+    config BLDC_PWM0B_8
+        bool "gpio8"
+    config BLDC_PWM0B_9
+        bool "gpio9"
+    config BLDC_PWM0B_10
+        bool "gpio10"
+    config BLDC_PWM0B_11
+        bool "gpio11"
+    config BLDC_PWM0B_12
+        bool "gpio12"
+    config BLDC_PWM0B_13
+        bool "gpio13"
+    config BLDC_PWM0B_14
+        bool "gpio14"
+    config BLDC_PWM0B_15
+        bool "gpio15"
+endchoice
+
+config BLDC_PWM0B
+    int
+    default 0 if BLDC_PWM0B_0
+    default 1 if BLDC_PWM0B_1
+    default 2 if BLDC_PWM0B_2
+    default 3 if BLDC_PWM0B_3
+    default 4 if BLDC_PWM0B_4
+    default 5 if BLDC_PWM0B_5
+    default 6 if BLDC_PWM0B_6
+    default 7 if BLDC_PWM0B_7
+    default 8 if BLDC_PWM0B_8
+    default 9 if BLDC_PWM0B_9
+    default 10 if BLDC_PWM0B_10
+    default 11 if BLDC_PWM0B_11
+    default 12 if BLDC_PWM0B_12
+    default 13 if BLDC_PWM0B_13
+    default 14 if BLDC_PWM0B_14
+    default 15 if BLDC_PWM0B_15
+
+
+choice
+    prompt "GPIO pin for BLDC Motor 0 PWM C"
+    depends on BLDC
+    config BLDC_PWM0C_2
+        bool "gpio2"
+    config BLDC_PWM0C_0
+        bool "gpio0"
+    config BLDC_PWM0C_1
+        bool "gpio1"
+    config BLDC_PWM0C_3
+        bool "gpio3"
+    config BLDC_PWM0C_4
+        bool "gpio4"
+    config BLDC_PWM0C_5
+        bool "gpio5"
+    config BLDC_PWM0C_6
+        bool "gpio6"
+    config BLDC_PWM0C_7
+        bool "gpio7"
+    config BLDC_PWM0C_8
+        bool "gpio8"
+    config BLDC_PWM0C_9
+        bool "gpio9"
+    config BLDC_PWM0C_10
+        bool "gpio10"
+    config BLDC_PWM0C_11
+        bool "gpio11"
+    config BLDC_PWM0C_12
+        bool "gpio12"
+    config BLDC_PWM0C_13
+        bool "gpio13"
+    config BLDC_PWM0C_14
+        bool "gpio14"
+    config BLDC_PWM0C_15
+        bool "gpio15"
+endchoice
+
+config BLDC_PWM0C
+    int
+    default 0 if BLDC_PWM0C_0
+    default 1 if BLDC_PWM0C_1
+    default 2 if BLDC_PWM0C_2
+    default 3 if BLDC_PWM0C_3
+    default 4 if BLDC_PWM0C_4
+    default 5 if BLDC_PWM0C_5
+    default 6 if BLDC_PWM0C_6
+    default 7 if BLDC_PWM0C_7
+    default 8 if BLDC_PWM0C_8
+    default 9 if BLDC_PWM0C_9
+    default 10 if BLDC_PWM0C_10
+    default 11 if BLDC_PWM0C_11
+    default 12 if BLDC_PWM0C_12
+    default 13 if BLDC_PWM0C_13
+    default 14 if BLDC_PWM0C_14
+    default 15 if BLDC_PWM0C_15
+
+config BLDC_POWER0
+    depends on BLDC
+    int "BLDC Motor 0 max. PWM power in percent"
+    default 60
+    help
+        BLDC Motor 0 max. PWM power in percent
+
+config BLDC_POWER0_HOLDING
+    depends on BLDC
+    int "BLDC Motor 0 holding PWM power in percent from max. PWM power"
+    default 40
+    help
+        BLDC Motor 0 holding PWM power in percent from max. PWM power
+
+
+endmenu
+
 endif

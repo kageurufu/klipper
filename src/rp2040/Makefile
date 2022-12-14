@@ -24,6 +24,8 @@ src-$(CONFIG_USBCANBUS) += ../lib/fast-hash/fasthash.c rp2040/usbserial.c
 src-$(CONFIG_HAVE_GPIO_HARD_PWM) += rp2040/hard_pwm.c
 src-$(CONFIG_HAVE_GPIO_SPI) += rp2040/spi.c
 src-$(CONFIG_HAVE_GPIO_I2C) += rp2040/i2c.c
+src-$(CONFIG_BLDC):= $(filter-out stepper.c, $(src-y)) #exclude original stepper.c from current build
+src-$(CONFIG_BLDC) += rp2040/bldc_stepper.c #and add BLDC version
 
 # rp2040 stage2 building
 STAGE2_FILE := $(shell echo $(CONFIG_RP2040_STAGE2_FILE))
