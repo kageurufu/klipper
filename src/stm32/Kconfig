@@ -459,10 +459,10 @@ config STM32_CANBUS_PC2_PC3
 
 
 config BLDC
-    bool "Enable BLDC motor support for STM32F401 NUCLEO and Simple FOC Shield"
+    bool "Enable BLDC motor support"
     default n
     help
-        Enable BLDC motor support for STM32F401 NUCLEO and Simple FOC Shield
+        Enable BLDC motor support
 
 menu "BLDC"
 depends on BLDC
@@ -753,7 +753,7 @@ config BLDC_POWER0_HOLDING
 
 choice
     prompt "GPIO pin for BLDC Motor 1 PWM A"
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     config BLDC_PWM1A_PC6
         bool "PC6"
     config BLDC_PWM1A_PA0
@@ -842,7 +842,7 @@ config BLDC_PWM1A
 
 choice
     prompt "GPIO pin for BLDC Motor 1 PWM B"
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     config BLDC_PWM1B_PC7
         bool "PC7"
     config BLDC_PWM1B_PA0
@@ -931,7 +931,7 @@ config BLDC_PWM1B
 
 choice
     prompt "GPIO pin for BLDC Motor 1 PWM C"
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     config BLDC_PWM1C_PA0
         bool "PA0"
     config BLDC_PWM1C_PA1
@@ -1019,14 +1019,14 @@ config BLDC_PWM1C
     default 41 if BLDC_PWM1C_PC9
 
 config BLDC_POWER1
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     int "BLDC Motor 1 max. PWM power in percent"
     default 60
     help
         BLDC Motor 1 max. PWM power in percent
 
 config BLDC_POWER1_HOLDING
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     int "BLDC Motor 1 holding PWM power in percent"
     default 40
     help
@@ -1034,7 +1034,7 @@ config BLDC_POWER1_HOLDING
 
 choice
     prompt "GPIO pin for BLDC Motor 2 PWM A"
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     config BLDC_PWM2A_PA15
         bool "PA15"
     config BLDC_PWM2A_PA0
@@ -1122,7 +1122,7 @@ config BLDC_PWM2A
 
 choice
     prompt "GPIO pin for BLDC Motor 2 PWM B"
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     config BLDC_PWM2B_PB13
         bool "PB13"
     config BLDC_PWM2B_PA0
@@ -1211,7 +1211,7 @@ config BLDC_PWM2B
 
 choice
     prompt "GPIO pin for BLDC Motor 2 PWM C"
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     config BLDC_PWM2C_PB14
         bool "PB14"
     config BLDC_PWM2C_PA0
@@ -1299,14 +1299,14 @@ config BLDC_PWM2C
     default 41 if BLDC_PWM2C_PC9
 
 config BLDC_POWER2
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     int "BLDC Motor 2 max. PWM power in percent"
     default 60
     help
         BLDC Motor 2 max. PWM power in percent
 
 config BLDC_POWER2_HOLDING
-    depends on BLDC
+    depends on BLDC && MACH_STM32F4
     int "BLDC Motor 2 holding PWM power in percent from max. PWM power"
     default 40
     help
