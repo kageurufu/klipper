@@ -51,6 +51,37 @@ lookup_clock_line(uint32_t periph_base)
                               .rst = &RCC->AHB2RSTR,
                               .bit = 1 << pos};
     }
+    if ((periph_base == FDCAN1_BASE) || (periph_base == FDCAN2_BASE))
+        return (struct cline){.en=&RCC->APBENR1,.rst=&RCC->APBRSTR1,.bit=1<<12};
+    if (periph_base == USB_BASE)
+        return (struct cline){.en=&RCC->APBENR1,.rst=&RCC->APBRSTR1,.bit=1<<13};
+    if (periph_base == CRS_BASE)
+        return (struct cline){.en=&RCC->APBENR1,.rst=&RCC->APBRSTR1,.bit=1<<16};
+    if (periph_base == I2C3_BASE)
+        return (struct cline){.en=&RCC->APBENR1,.rst=&RCC->APBRSTR1,.bit=1<<23};
+    if (periph_base == TIM1_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<11};
+    if (periph_base == SPI1_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<12};
+    if (periph_base == USART1_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<14};
+    if (periph_base == TIM14_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<15};
+    if (periph_base == TIM15_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<16};
+    if (periph_base == TIM16_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<17};
+    if (periph_base == TIM17_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<18};
+    if (periph_base == ADC1_BASE)
+        return (struct cline){.en=&RCC->APBENR2,.rst=&RCC->APBRSTR2,.bit=1<<20};
+    if (periph_base >= APBPERIPH_BASE && periph_base <= LPTIM1_BASE)
+    {
+        uint32_t bit = 1 << ((periph_base - APBPERIPH_BASE) / 0x400);
+        return (struct cline){.en=&RCC->APBENR1, .rst=&RCC->APBRSTR1, .bit=bit};
+    }
+    // unknown peripheral. returning .bit=0 makes this a no-op
+    return (struct cline){.en=&RCC->APBENR1, .rst=NULL, .bit=0};
 }
 
 // Return the frequency of the given peripheral clock
@@ -67,19 +98,6 @@ gpio_clock_enable(GPIO_TypeDef *regs)
     uint32_t rcc_pos = ((uint32_t)regs - GPIOA_BASE) / 0x400;
     RCC->AHB2ENR |= 1 << rcc_pos;
     RCC->AHB2ENR;
-}
-
-#define USB_BOOT_FLAG_ADDR (CONFIG_RAM_START + CONFIG_RAM_SIZE - 4096)
-#define USB_BOOT_FLAG 0x55534220424f4f54 // "USB BOOT"
-
-// Handle USB reboot requests
-void
-bootloader_request(void)
-{
-    irq_disable();
-    // System DFU Bootloader
-    *(uint64_t*)USB_BOOT_FLAG_ADDR = USB_BOOT_FLAG;
-    NVIC_SystemReset();
 }
 
 #if !CONFIG_STM32_CLOCK_REF_INTERNAL
@@ -105,6 +123,9 @@ enable_clock_stm32g4(void)
         while (!(RCC->CR & RCC_CR_HSIRDY))
             ;
     }
+    pllcfgr |= (pll_freq/pll_base) << RCC_PLLCFGR_PLLN_Pos;
+    pllcfgr |= (pll_freq/CONFIG_CLOCK_FREQ - 1) << RCC_PLLCFGR_PLLR_Pos;
+    pllcfgr |= (pll_freq/FREQ_USB - 1) << RCC_PLLCFGR_PLLQ_Pos;
     RCC->PLLCFGR = (pllcfgr | ((pll_freq/pll_base) << RCC_PLLCFGR_PLLN_Pos)
                     | (0 << RCC_PLLCFGR_PLLR_Pos));
     RCC->CR |= RCC_CR_PLLON;
@@ -166,29 +187,22 @@ clock_setup(void)
         ;
 }
 
-// Main entry point - called from armcm_boot.c:ResetHandler()
-void
-armcm_main(void) {
-    if (CONFIG_USBSERIAL && *(uint64_t*)USB_BOOT_FLAG_ADDR == USB_BOOT_FLAG) {
-        *(uint64_t*)USB_BOOT_FLAG_ADDR = 0;
-        uint32_t *sysbase = (uint32_t*)0x1fff0000;
-        asm volatile("mov sp, %0\n bx %1"
-                     : : "r"(sysbase[0]), "r"(sysbase[1]));
-    }
-
-    // Run SystemInit() and then restore VTOR
-    SystemInit();
-    SCB->VTOR = (uint32_t)VectorTable;
-
-    clock_setup();
-
-    sched_main();
-}
 
 
 /****************************************************************
  * Bootloader
  ****************************************************************/
+
+#define USB_BOOT_FLAG_ADDR (CONFIG_RAM_START + CONFIG_RAM_SIZE - 4096)
+#define USB_BOOT_FLAG 0x55534220424f4f54 // "USB BOOT"
+
+// Handle USB reboot requests
+void
+bootloader_request(void)
+{
+    try_request_canboot();
+    usb_reboot_for_dfu_bootloader();
+}
 
 // Reboot into USB "HID" bootloader
 static void
@@ -224,16 +238,6 @@ check_usb_dfu_bootloader(void)
                  : : "r"(sysbase[0]), "r"(sysbase[1]));
 }
 
-// Handle reboot requests
-void
-bootloader_request(void)
-{
-    try_request_canboot();
-    if (CONFIG_STM32_FLASH_START_4000)
-        usb_hid_bootloader();
-    usb_reboot_for_dfu_bootloader();
-}
-
 
 /****************************************************************
  * Startup
@@ -243,18 +247,41 @@ bootloader_request(void)
 void
 armcm_main(void)
 {
-    check_usb_dfu_bootloader();
-
-    // Run SystemInit() and then restore VTOR
-    SystemInit();
+     if (CONFIG_USBSERIAL && *(uint64_t*)USB_BOOT_FLAG_ADDR == USB_BOOT_FLAG) {
+        *(uint64_t*)USB_BOOT_FLAG_ADDR = 0;
+        uint32_t *sysbase = (uint32_t*)0x1fff0000;
+        asm volatile("mov sp, %0\n bx %1"
+                     : : "r"(sysbase[0]), "r"(sysbase[1]));
+    }
     SCB->VTOR = (uint32_t)VectorTable;
 
-    // Reset peripheral clocks (for some bootloaders that don't)
-    RCC->AHB1ENR = 0x38000;
-    RCC->AHB2ENR = 0;
-    RCC->APB1ENR = 0;
-    RCC->APB2ENR = 0;
+    // Reset clock registers (in case bootloader has changed them)
+    RCC->CR |= RCC_CR_HSION;
+    while (!(RCC->CR & RCC_CR_HSIRDY))
+        ;
+    RCC->CFGR = 0x00000000;
+    RCC->CR = RCC_CR_HSION;
+    while (RCC->CR & RCC_CR_PLLRDY)
+        ;
+    RCC->PLLCFGR = 0x00001000;
+    RCC->IOPENR = 0x00000000;
+    RCC->AHBENR = 0x00000100;
+    RCC->APBENR1 = 0x00000000;
+    RCC->APBENR2 = 0x00000000;
 
+    check_usb_dfu_bootloader();
+
+    // Set flash latency, cache and prefetch; use reset value as base
+    uint32_t acr = 0x00040600;
+    acr = (acr & ~FLASH_ACR_LATENCY) | (2<<FLASH_ACR_LATENCY_Pos);
+    acr |= FLASH_ACR_ICEN | FLASH_ACR_PRFTEN;
+    FLASH->ACR = acr;
+
+     // Run SystemInit() and then restore VTOR
+    SystemInit();
+    SCB->VTOR = (uint32_t)VectorTable;   
+    
+    // Configure main clock
     clock_setup();
 
     sched_main();
