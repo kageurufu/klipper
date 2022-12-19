@@ -107,21 +107,6 @@ enable_clock_stm32g4(void)
         enable_pclock(CRS_BASE);
         CRS->CR |= CRS_CR_AUTOTRIMEN | CRS_CR_CEN;
     }
-    if (CONFIG_USB) {
-        uint32_t ref = (CONFIG_STM32_CLOCK_REF_INTERNAL
-                        ? 16000000 : CONFIG_CLOCK_REF_FREQ);
-        uint32_t plls_base = 2000000, plls_freq = FREQ_USB * 4;
-        RCC->PLLSAICFGR = (
-            ((ref/plls_base) << RCC_PLLSAICFGR_PLLSAIM_Pos)
-            | ((plls_freq/plls_base) << RCC_PLLSAICFGR_PLLSAIN_Pos)
-            | (((plls_freq/FREQ_USB)/2 - 1) << RCC_PLLSAICFGR_PLLSAIP_Pos)
-            | ((plls_freq/FREQ_USB) << RCC_PLLSAICFGR_PLLSAIQ_Pos));
-        RCC->CR |= RCC_CR_PLLSAION;
-        while (!(RCC->CR & RCC_CR_PLLSAIRDY))
-            ;
-
-        RCC->DCKCFGR2 = RCC_DCKCFGR2_CK48MSEL;
-    }
 }
 
 // Main clock setup called at chip startup
@@ -206,23 +191,6 @@ armcm_main(void)
         asm volatile("mov sp, %0\n bx %1"
                      : : "r"(sysbase[0]), "r"(sysbase[1]));
     }
-    SCB->VTOR = (uint32_t)VectorTable;
-
-    // Reset clock registers (in case bootloader has changed them)
-    RCC->CR |= RCC_CR_HSION;
-    while (!(RCC->CR & RCC_CR_HSIRDY))
-        ;
-    RCC->CFGR = 0x00000000;
-    RCC->CR = RCC_CR_HSION;
-    while (RCC->CR & RCC_CR_PLLRDY)
-        ;
-    RCC->PLLCFGR = 0x00001000;
-    RCC->IOPENR = 0x00000000;
-    RCC->AHBENR = 0x00000100;
-    RCC->APBENR1 = 0x00000000;
-    RCC->APBENR2 = 0x00000000;
-
-    check_usb_dfu_bootloader();
 
     // Set flash latency, cache and prefetch; use reset value as base
     uint32_t acr = 0x00040600;
