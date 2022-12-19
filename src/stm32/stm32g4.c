@@ -155,28 +155,6 @@ bootloader_request(void)
     dfu_reboot();
 }
 
-// Flag that bootloader is desired and reboot
-static void
-usb_reboot_for_dfu_bootloader(void)
-{
-    irq_disable();
-    *(uint64_t*)USB_BOOT_FLAG_ADDR = USB_BOOT_FLAG;
-    NVIC_SystemReset();
-}
-
-// Check if rebooting into system DFU Bootloader
-static void
-check_usb_dfu_bootloader(void)
-{
-    if (!CONFIG_USB || *(uint64_t*)USB_BOOT_FLAG_ADDR != USB_BOOT_FLAG)
-        return;
-    *(uint64_t*)USB_BOOT_FLAG_ADDR = 0;
-    uint32_t *sysbase = (uint32_t*)0x1fff0000;
-    asm volatile("mov sp, %0\n bx %1"
-                 : : "r"(sysbase[0]), "r"(sysbase[1]));
-}
-
-
 /****************************************************************
  * Startup
  ****************************************************************/
