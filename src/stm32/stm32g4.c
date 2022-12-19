@@ -16,6 +16,7 @@
 
 #define FREQ_PERIPH_DIV 1
 #define FREQ_PERIPH (CONFIG_CLOCK_FREQ / FREQ_PERIPH_DIV)
+#define FREQ_USB 48000000
 
 // Map a peripheral address to its enable bits
 struct cline
@@ -116,6 +117,21 @@ enable_clock_stm32g4(void)
         enable_pclock(CRS_BASE);
         CRS->CR |= CRS_CR_AUTOTRIMEN | CRS_CR_CEN;
     }
+    if (CONFIG_USB) {
+        uint32_t ref = (CONFIG_STM32_CLOCK_REF_INTERNAL
+                        ? 16000000 : CONFIG_CLOCK_REF_FREQ);
+        uint32_t plls_base = 2000000, plls_freq = FREQ_USB * 4;
+        RCC->PLLSAICFGR = (
+            ((ref/plls_base) << RCC_PLLSAICFGR_PLLSAIM_Pos)
+            | ((plls_freq/plls_base) << RCC_PLLSAICFGR_PLLSAIN_Pos)
+            | (((plls_freq/FREQ_USB)/2 - 1) << RCC_PLLSAICFGR_PLLSAIP_Pos)
+            | ((plls_freq/FREQ_USB) << RCC_PLLSAICFGR_PLLSAIQ_Pos));
+        RCC->CR |= RCC_CR_PLLSAION;
+        while (!(RCC->CR & RCC_CR_PLLSAIRDY))
+            ;
+
+        RCC->DCKCFGR2 = RCC_DCKCFGR2_CK48MSEL;
+    }
 }
 
 // Main clock setup called at chip startup
@@ -163,6 +179,81 @@ armcm_main(void) {
     // Run SystemInit() and then restore VTOR
     SystemInit();
     SCB->VTOR = (uint32_t)VectorTable;
+
+    clock_setup();
+
+    sched_main();
+}
+
+
+/****************************************************************
+ * Bootloader
+ ****************************************************************/
+
+// Reboot into USB "HID" bootloader
+static void
+usb_hid_bootloader(void)
+{
+    irq_disable();
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    RCC->APB1ENR;
+    PWR->CR |= PWR_CR_DBP;
+    RTC->BKP4R = 0x424C; // HID Bootloader magic key
+    PWR->CR &= ~PWR_CR_DBP;
+    NVIC_SystemReset();
+}
+
+// Flag that bootloader is desired and reboot
+static void
+usb_reboot_for_dfu_bootloader(void)
+{
+    irq_disable();
+    *(uint64_t*)USB_BOOT_FLAG_ADDR = USB_BOOT_FLAG;
+    NVIC_SystemReset();
+}
+
+// Check if rebooting into system DFU Bootloader
+static void
+check_usb_dfu_bootloader(void)
+{
+    if (!CONFIG_USB || *(uint64_t*)USB_BOOT_FLAG_ADDR != USB_BOOT_FLAG)
+        return;
+    *(uint64_t*)USB_BOOT_FLAG_ADDR = 0;
+    uint32_t *sysbase = (uint32_t*)0x1fff0000;
+    asm volatile("mov sp, %0\n bx %1"
+                 : : "r"(sysbase[0]), "r"(sysbase[1]));
+}
+
+// Handle reboot requests
+void
+bootloader_request(void)
+{
+    try_request_canboot();
+    if (CONFIG_STM32_FLASH_START_4000)
+        usb_hid_bootloader();
+    usb_reboot_for_dfu_bootloader();
+}
+
+
+/****************************************************************
+ * Startup
+ ****************************************************************/
+
+// Main entry point - called from armcm_boot.c:ResetHandler()
+void
+armcm_main(void)
+{
+    check_usb_dfu_bootloader();
+
+    // Run SystemInit() and then restore VTOR
+    SystemInit();
+    SCB->VTOR = (uint32_t)VectorTable;
+
+    // Reset peripheral clocks (for some bootloaders that don't)
+    RCC->AHB1ENR = 0x38000;
+    RCC->AHB2ENR = 0;
+    RCC->APB1ENR = 0;
+    RCC->APB2ENR = 0;
 
     clock_setup();
 
