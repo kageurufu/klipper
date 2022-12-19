@@ -163,6 +163,8 @@ bootloader_request(void)
 void
 armcm_main(void)
 {
+    dfu_reboot_check();
+
      if (CONFIG_USBSERIAL && *(uint64_t*)USB_BOOT_FLAG_ADDR == USB_BOOT_FLAG) {
         *(uint64_t*)USB_BOOT_FLAG_ADDR = 0;
         uint32_t *sysbase = (uint32_t*)0x1fff0000;
